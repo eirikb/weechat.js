@@ -1,13 +1,16 @@
 WeeChat.js
 ===
 
-weechat relay protocol module for Node.js
+[WeeChat Relay Protocol](http://www.weechat.org/files/doc/devel/weechat_relay_protocol.en.html) 
+module for [Node.js](http://nodejs.org)
 
-The weechat relay protocol can be found in npm
+npm
+---
 
     npm install weechat
 
-And can be used like this:
+Usage
+---
 
     var weechat = requrie('weechat');
 
