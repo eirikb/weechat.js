@@ -3,6 +3,10 @@
     "author": "Eirik Brandtzæg <eirikb@eirikb.no>",
     "main": "weechat.js",
     "version": "0.0.1",
+    "repository": {
+        "type": "git", 
+        "url": "https://github.com/eirikb/weechat.js"
+    },
     "dependencies": {
     }
 }
