@@ -1,6 +1,6 @@
 var net = require('net');
 
-var data, client, partial, obj, total = 0,
+var data, client, partial, id, total = 0,
 id = 0,
 callbacks = {},
 listeners = {},
@@ -68,17 +68,16 @@ function loop(range, cb) {
 }
 
 function onData(part) {
-    var tmpBuf, ret, cb;
+    var tmpBuf, ret, cb, obj;
     data = part;
 
     if (total === 0) {
-        obj = {};
         total = getInt();
-        obj.compress = getCompression();
-        obj.id = getString();
+        getChar();
+        id = getString();
 
         // 9 is number of bytes already read
-        total -= (9 + obj.id.length);
+        total -= (9 + id.length);
         partial = data;
     } else {
         tmpBuf = new Buffer(partial.length + data.length);
@@ -91,14 +90,14 @@ function onData(part) {
         data = partial;
         total = 0;
         partial = '';
-        ret = parse();
-        cb = callbacks[obj.id];
+        obj = parse();
+        cb = callbacks[id];
         if (cb) {
             cb(obj);
-            delete callbacks[obj.id];
+            delete callbacks[id];
         }
 
-        [obj.id, '*'].forEach(function(l) {
+        [id, '*'].forEach(function(l) {
             if (listeners[l]) {
                 listeners[l].forEach(function(cb) {
                     cb(obj);
@@ -122,12 +121,6 @@ function runType(type) {
     } else {
         throw 'Unkown type: ' + type;
     }
-}
-
-function getCompression() {
-    var c = data[0];
-    data = data.slice(1);
-    return c;
 }
 
 function getChar() {
@@ -165,6 +158,7 @@ function getHashtable() {
     typeValues = getType(),
     count = getInt(),
     obj = {};
+
     loop(count, function() {
         obj[types[typeKeys]()] = runType(typeValues);
     });
@@ -172,18 +166,18 @@ function getHashtable() {
 }
 
 function getHdata() {
-    var keys, paths, objs = [];
+    var keys, paths, count, objs = [],
+    hpath = getString();
 
-    obj.hpath = getString();
     keys = getString().split(',');
-    paths = obj.hpath.split('/');
-    obj.count = getInt();
+    paths = hpath.split('/');
+    count = getInt();
 
     keys = keys.map(function(key) {
         return key.split(':');
     });
 
-    loop(obj.count, function() {
+    loop(count, function() {
         var tmp = {};
         tmp.pointers = paths.map(function(path) {
             return getPointer();
@@ -193,8 +187,7 @@ function getHdata() {
         });
         objs.push(tmp);
     });
-    obj.objects = objs;
-    return obj;
+    return objs;
 }
 
 function getInfo() {
