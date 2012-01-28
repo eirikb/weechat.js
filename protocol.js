@@ -1,10 +1,4 @@
-var net = require('net');
-
 var data, client, partial, id, total = 0,
-id = 0,
-callbacks = {},
-listeners = {},
-self = this,
 types = {
     chr: getChar,
     int: getInt,
@@ -21,54 +15,8 @@ types = {
     inl: getInfolist
 };
 
-exports.connect = function(port, password, cb) {
-    client = net.connect(port, function() {
-        var connected = true;
-        self.write('init password=' + password + ',compression=off');
-        // Ping test password 
-        self.write('info version');
-        client.on('end', function() {
-            connected = false;
-        });
-        setTimeout(function() {
-            if (connected) {
-                client.on('data', onData);
-            }
-            if (cb) {
-                cb(connected);
-            }
-        },
-        100);
-    });
-};
-
-exports.write = function(msg, cb) {
-    id++;
-    callbacks[id] = cb;
-    client.write('(' + id + ') ' + msg + '\n');
-};
-
-exports.on = function(listener, cb) {
-    if (arguments.length === 1) {
-        cb = listener;
-        listener = '*';
-    }
-    if (!listeners[listener]) {
-        listeners[listener] = [];
-    }
-    listeners[listener].push(cb);
-};
-
-// Helper
-function loop(range, cb) {
-    var i;
-    for (i = 0; i < range; i++) {
-        cb(i);
-    }
-}
-
-function onData(part) {
-    var tmpBuf, ret, cb, obj;
+exports.data = function(part, cb) {
+    var tmpBuf, ret, obj;
     data = part;
 
     if (total === 0) {
@@ -91,19 +39,17 @@ function onData(part) {
         total = 0;
         partial = '';
         obj = parse();
-        cb = callbacks[id];
         if (cb) {
-            cb(obj);
-            delete callbacks[id];
+            cb(id, obj);
         }
+    }
+};
 
-        [id, '*'].forEach(function(l) {
-            if (listeners[l]) {
-                listeners[l].forEach(function(cb) {
-                    cb(obj);
-                });
-            }
-        });
+// Helper
+function loop(range, cb) {
+    var i;
+    for (i = 0; i < range; i++) {
+        cb(i);
     }
 }
 
@@ -150,7 +96,7 @@ function getPointer() {
     var l = data[0],
     pointer = data.slice(1, l + 1);
     data = data.slice(l + 1);
-    return pointer;
+    return pointer.toString();
 }
 
 function getHashtable() {
@@ -192,8 +138,8 @@ function getHdata() {
 
 function getInfo() {
     return {
-        name: getString(),
-        content: getString()
+        key: getString(),
+        value: getString()
     };
 }
 
