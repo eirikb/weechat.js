@@ -1,4 +1,4 @@
-// This module is a mess! Have to be fixed in the future.
+// TODO: This module is a mess! Have to be fixed in the future.
 //
 var colors = [['default', 0], ['black', 0], ['darkgray', 8], ['red', 1], ['lightred', 9], ['green', 2], ['lightgreen', 10], ['brown', 3], ['yellow', 11], ['blue', 4], ['lightblue', 12], ['magenta', 5], ['lightmagenta', 13], ['cyan', 6], ['lightcyan', 14], ['gray', 7], ['white', 0]];
 
@@ -22,6 +22,7 @@ function parts(line) {
         j = i;
         i++;
     }
+    j = j < 0 ? 0: j;
     s = line.slice(j, line.length);
     if (s.length > 0) {
         all.push(s);
