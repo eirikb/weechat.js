@@ -23,6 +23,7 @@ exports.connect = function(port, password, cb) {
         setTimeout(function() {
             if (connected) {
                 client.on('data', onData);
+                self.write('sync');
             }
             if (cb) {
                 cb(connected);
@@ -112,7 +113,7 @@ function onData(data) {
         [id, '*'].forEach(function(l) {
             if (listeners[l]) {
                 listeners[l].forEach(function(cb) {
-                    cb(obj);
+                    cb(obj, id);
                 });
             }
         });

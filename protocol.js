@@ -21,6 +21,7 @@ exports.data = function(part, cb) {
 
     if (total === 0) {
         total = getInt();
+        // Ignore compression for now
         getChar();
         id = getString();
 
