@@ -80,7 +80,7 @@ exports.buffers = function(cb) {
     }
 };
 
-exports.lines = function(cb) {
+exports.bufferlines = function(cb) {
     if (cb) {
         self.write(getlines, function(lines) {
             var buffers = {};
@@ -93,7 +93,7 @@ exports.lines = function(cb) {
                     prefix: line.prefix,
                     date: line.date,
                     displayed: line.displayed,
-                    message: line.message
+                    messageParts: color.parse(line.message)
                 });
             });
             cb(buffers);
