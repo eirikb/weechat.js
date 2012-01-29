@@ -102,6 +102,30 @@ exports.bufferlines = function(cb) {
     }
 };
 
+exports.onLine = function(cb) {
+    self.on('_buffer_line_added', cb);
+};
+
+exports.onClose = function(cb) {
+    self.on('_buffer_closing', cb);
+};
+
+exports.onRenamed = function(cb) {
+    self.on('_buffer_renamed', cb);
+};
+
+exports.onLocalvar = function(cb) {
+    self.on('_buffer_localvar_added', cb);
+};
+
+exports.onTitle = function(cb) {
+    self.on('_buffer_title_change', cb);
+};
+
+exports.onNicklist = function(cb) {
+    self.on('_nicklist', cb);
+};
+
 function onData(data) {
     protocol.data(data, function(id, obj) {
         cb = callbacks[id];
@@ -113,7 +137,16 @@ function onData(data) {
         [id, '*'].forEach(function(l) {
             if (listeners[l]) {
                 listeners[l].forEach(function(cb) {
-                    cb(obj, id);
+                    obj.forEach(function(o) {
+                        if (o.prefix) {
+                            o.prefixParts = color.parse(o.prefix);
+                        }
+                        if (o.message) {
+                            o.messageParts = color.parse(o.message);
+                        }
+                        o.buffer = o.pointers[0];
+                        cb(o, id);
+                    });
                 });
             }
         });
