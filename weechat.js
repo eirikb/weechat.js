@@ -14,23 +14,26 @@ getnicks = 'nicklist';
 
 exports.connect = function(port, password, cb) {
     client = net.connect(port, function() {
-        var connected = true;
+        var err = false;
         self.write('init password=' + password + ',compression=off');
         // Ping test password 
         self.write('info version');
         client.on('end', function() {
-            connected = false;
+            err = 'Wrong password';
         });
         setTimeout(function() {
-            if (connected) {
+            if (!err) {
                 client.on('data', onData);
                 self.write('sync');
             }
             if (cb) {
-                cb(connected);
+                cb(err);
             }
         },
         100);
+    });
+    client.on('error', function(err) {
+        cb(err);
     });
 };
 
