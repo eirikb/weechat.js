@@ -43,7 +43,7 @@ function _rgb_color(index) {
 function _convert_weechat_color(color) {
     try {
         var index = int(color);
-        return util.format('\x01(Fr%s)', color_options[index]);
+        return util.format('\x01(Fr%s)', WEECHAT_BASIC_COLORS[index]);
     } catch(e) {
         console.error('Error decoding WeeChat color "%s"', color, e);
         return '';
@@ -124,7 +124,7 @@ function _convert_color(match, i) {
             //# direct ncurses pair number, ignored
             return '';
         }
-        if (!isNaN(parseInt(color.sliec(1), 10))) {
+        if (!isNaN(parseInt(color.slice(1), 10))) {
             return _convert_weechat_color(int(color.slice(1)));
         }
         //# color code
@@ -151,7 +151,8 @@ exports.parse = function(text) {
     if (rm) {
         for (i = 0; i < rm.length; i++) {
             m = _convert_color(rm, i);
-            text = text.replace(r, m, 1);
+            //text = text.replace(r, m, 1);
+            text = text.replace(r, '', 1);
         }
     }
     return text;
