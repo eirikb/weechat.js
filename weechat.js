@@ -7,8 +7,9 @@ callbacks = {},
 listeners = {},
 self = this;
 
-var getlines = 'hdata buffer:gui_buffers(*)/own_lines/first_line(*)/data',
-getbuffers = 'hdata buffer:gui_buffers(*) number,full_name,type,title,local_variables',
+var getbuffers = 'hdata buffer:gui_buffers(*) number,full_name,type,title,local_variables',
+getlines1 = 'hdata buffer:',
+getlines2 = '/own_lines/first_line(*)/data',
 getnicks = 'nicklist';
 
 exports.connect = function(port, password, cb) {
@@ -64,7 +65,7 @@ exports.buffers = function(cb) {
             buffers = buffers.map(function(buffer) {
                 var lv = buffer.local_variables;
                 return {
-                    id: buffer.pointers[0],
+                    id: '0x' + buffer.pointers[0],
                     number: buffer.number,
                     fullName: buffer.full_name,
                     typeId: buffer.type,
@@ -81,29 +82,55 @@ exports.buffers = function(cb) {
     }
 };
 
-exports.bufferlines = function(cb) {
+exports.lines = function(bufferid, cb) {
+    if (arguments.length === 1) {
+        cb = bufferid;
+        bufferid = 'gui_buffers(*)';
+    }
     if (cb) {
-        self.write(getlines, function(lines) {
-            var buffers = {};
-            lines.forEach(function(line) {
-                var buffer = line.buffer;
-                if (!buffers[buffer]) {
-                    buffers[buffer] = [];
-                }
-                buffers[buffer].push({
+        self.write(getlines1 + bufferid + getlines2, function(lines) {
+            lines = lines.map(function(line) {
+                return {
+                    buffer: '0x' + line.pointers[0],
                     prefix: line.prefix,
                     date: line.date,
                     displayed: line.displayed,
+                    prefixParts: color.parse(line.preix),
                     messageParts: color.parse(line.message)
-                });
+                }
             });
-            cb(buffers);
+            cb(lines);
         });
+    }
+};
+
+exports.bufferlines = function(cb) {
+    if (cb) {
+        self.buffers(function(buffers) {
+            console.log(buffers);
+            self.lines(function(lines) {
+                lines.forEach(function(line) {
+                    buffers.filter(function(buffer) {
+                        return buffer.id.match(line.buffer);
+                    }).forEach(function(buffer){
+                        if (!buffer.lines) {
+                            buffer.lines = [];
+                        }
+                        buffer.lines.push(line);
+                    });
+                });
+                cb(buffers);
+            });
+        });    
     }
 };
 
 exports.onLine = function(cb) {
     self.on('_buffer_line_added', cb);
+};
+
+exports.onOpen = function(cb) {
+    self.on('_buffer_opened', cb);
 };
 
 exports.onClose = function(cb) {
@@ -138,13 +165,18 @@ function onData(data) {
             if (listeners[l]) {
                 listeners[l].forEach(function(cb) {
                     obj.forEach(function(o) {
+                        o.pointers = o.pointers.map(function(p) {
+                            return '0x' + p;
+                        });
                         if (o.prefix) {
                             o.prefixParts = color.parse(o.prefix);
                         }
                         if (o.message) {
                             o.messageParts = color.parse(o.message);
                         }
-                        o.buffer = o.pointers[0];
+                        if (o.buffer) {
+                            o.buffer = '0x' + o.buffer;
+                        }
                         cb(o, id);
                     });
                 });
