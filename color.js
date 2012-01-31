@@ -97,8 +97,11 @@ function _attrcode_to_char(code) {
     return codes[code];
 }
 
-function _convert_color(match) {
-    var color = match[0];
+function _convert_color(match, i) {
+    var color = match[i];
+    if (!color) {
+        return '';
+    }
     if (color[0] === '\x19') {
         if (color[1] === 'b') {
             //# bar code, ignored
@@ -137,12 +140,20 @@ function _convert_color(match) {
         return '\x01(Fr)\x01(Br)';
     }
     //# should never be executed!
-    return match[0];
+    return match[i];
 }
 
 exports.parse = function(text) {
-    var r = new RegExp(RE_COLOR);
-    var m = _convert_color(r.exec(text));
-    return text.replace(r, m);
+    var r, rm, i, m;
+
+    r = new RegExp(RE_COLOR);
+    rm = r.exec(text);
+    if (rm) {
+        for (i = 0; i < rm.length; i++) {
+            m = _convert_color(rm, i);
+            text = text.replace(r, m);
+        }
+    }
+    return text;
 };
 
