@@ -38,15 +38,18 @@ Colorizing
 
 At the moment the module return only pure WeeChat strings, including coding for colors.   
 The module supports stripping these codes away using
+
 ```JavaScript
 weechat.style(line);
 ```
+
 Will support real color parsing in the future.  
 
 Helper functions
 ---
 
 Get all buffers including lines:
+
 ```JavaScript
 weechat.bufferlines(function(buffers) {
     buffers.forEach(function(buffer) {
