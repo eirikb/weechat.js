@@ -155,6 +155,8 @@ exports.parse = function(text) {
             text = text.replace(r, '', 1);
         }
     }
-    return text;
+    return [{
+        part: text
+    }];
 };
 

@@ -12,6 +12,7 @@ getlines1 = 'hdata buffer:',
 getlines2 = '/own_lines/first_line(*)/data',
 getnicks = 'nicklist';
 
+// This should create styles in the future
 exports.style = function(line) {
     return color.parse(line);
 };
