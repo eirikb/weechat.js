@@ -44,6 +44,8 @@ weechat.style(line);
 ```
 
 Will support real color parsing in the future.  
+Note that since a WeeChat string can contain many styles it will be split into 'parts'.
+
 
 Helper functions
 ---
@@ -68,31 +70,31 @@ weechat.bufferlines(function(buffers) {
 There are some helper functions for easier listeners
 
 ```JavaScript
-weechat.onLine = function(line) {
+weechat.onLine(function(line) {
     console.log('Got a line', line);
-};
+});
 
-weechat.onOpen = function(buffer) {
+weechat.onOpen(function(buffer) {
     console.log('Buffer opened', buffer);
-};
+});
 
-weechat.onClose = function(buffer) {
+weechat.onClose(function(buffer) {
     console.log('Buffer closed', buffer);
-};
+});
 
-weechat.onRenamed = function(buffer) {
+weechat.onRenamed(function(buffer) {
     console.log('Buffer renamed', buffer);
-};
+});
 
-weechat.onLocalvar = function(lv) {
+weechat.onLocalvar(function(lv) {
     console.log('New/changed local variable', lv);
-};
+});
 
-weechat.onTitle = function(buffer) {
+weechat.onTitle(function(buffer) {
     console.log('Buffer got new title', buffer);
-};
+});
 
-weechat.onNicklist = function(nicklist) {
+weechat.onNicklist(function(nicklist) {
     console.log('Got nicklist', nicklist);
-};
+});
 ```
