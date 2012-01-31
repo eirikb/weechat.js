@@ -12,6 +12,10 @@ getlines1 = 'hdata buffer:',
 getlines2 = '/own_lines/first_line(*)/data',
 getnicks = 'nicklist';
 
+exports.style = function(line) {
+    return color.parse(line);
+};
+
 exports.connect = function(port, password, cb) {
     client = net.connect(port, function() {
         var err = false;
@@ -98,9 +102,8 @@ exports.lines = function(bufferid, cb) {
                     prefix: line.prefix,
                     date: line.date,
                     displayed: line.displayed,
-                    prefixParts: color.parse(line.preix),
-                    messageParts: color.parse(line.message)
-                }
+                    message: line.message
+                };
             });
             cb(lines);
         });
@@ -110,7 +113,6 @@ exports.lines = function(bufferid, cb) {
 exports.bufferlines = function(cb) {
     if (cb) {
         self.buffers(function(buffers) {
-            console.log(buffers);
             self.lines(function(lines) {
                 lines.forEach(function(line) {
                     buffers.filter(function(buffer) {
@@ -174,12 +176,6 @@ function onData(data) {
                             }
                             return p;
                         });
-                        if (o.prefix) {
-                            o.prefixParts = color.parse(o.prefix);
-                        }
-                        if (o.message) {
-                            o.messageParts = color.parse(o.message);
-                        }
                         if (o.buffer && !o.buffer.match(/^0x/)) {
                             o.buffer = '0x' + o.buffer;
                         }
