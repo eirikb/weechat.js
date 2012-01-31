@@ -166,7 +166,10 @@ function onData(data) {
                 listeners[l].forEach(function(cb) {
                     obj.forEach(function(o) {
                         o.pointers = o.pointers.map(function(p) {
-                            return '0x' + p;
+                            if (!p.match(/^0x/)) {
+                                return '0x' + p;
+                            }
+                            return p;
                         });
                         if (o.prefix) {
                             o.prefixParts = color.parse(o.prefix);
@@ -174,7 +177,7 @@ function onData(data) {
                         if (o.message) {
                             o.messageParts = color.parse(o.message);
                         }
-                        if (o.buffer) {
+                        if (o.buffer && !o.buffer.match(/^0x/)) {
                             o.buffer = '0x' + o.buffer;
                         }
                         cb(o, id);
