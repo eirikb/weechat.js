@@ -151,7 +151,7 @@ exports.parse = function(text) {
     if (rm) {
         for (i = 0; i < rm.length; i++) {
             m = _convert_color(rm, i);
-            text = text.replace(r, m);
+            text = text.replace(r, m, 1);
         }
     }
     return text;
