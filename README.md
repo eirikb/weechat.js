@@ -13,7 +13,7 @@ Usage
 ---
 
 ```JavaScript
-var weechat = requrie('weechat');
+var weechat = require('weechat');
 
 // Can only connect to localhost
 // First argument is port, second is password
