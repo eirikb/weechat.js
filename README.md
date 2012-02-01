@@ -21,8 +21,8 @@ weechat.connect(8000, 'test', function(err) {
     if (!err) {
         console.log('Connected!');
 
-        weechat.write('info version', function(version) {
-            console.log('WeeChat version', version);
+        weechat.version(function(version) {
+            console.log('WeeChat version:', version);
         });
 
         weechat.onLine(function(line) {
@@ -46,6 +46,26 @@ weechat.style(line);
 Will support real color parsing in the future.  
 Note that since a WeeChat string can contain many styles it will be split into 'parts'.
 
+Interaction
+---
+
+__.write__ is used to send messages to WeeChat, like this:
+
+```JavaScript
+weechat.write('input irc.freenode.#weechat hello guys!');
+```
+
+Results are asynchronous:
+
+```JavaScript
+weechat.write('info version', function(data) {
+    console.log('key %s with value %s', data.key, data.value);
+});
+
+weechat.write('_buffer_line_added', function(data) {
+    console.log('Got a line', data);
+});
+```
 
 Helper functions
 ---
@@ -96,5 +116,9 @@ weechat.onTitle(function(buffer) {
 
 weechat.onNicklist(function(nicklist) {
     console.log('Got nicklist', nicklist);
+});
+
+weechat.onVersion(function(version) {
+    console.log('Connected to WeeChat version:', version);
 });
 ```
