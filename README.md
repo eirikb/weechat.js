@@ -33,6 +33,15 @@ weechat.connect(8000, 'test', function(err) {
 });
 ```
 
+Connect to different host:
+
+```JavaScript
+var weechat = require('weechat');
+
+weechat.connect(8000, '10.0.0.10', 'test', function(err) {
+});
+```
+
 Colorizing
 ---
 
