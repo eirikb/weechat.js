@@ -17,8 +17,8 @@ exports.style = function(line) {
     return color.parse(line);
 };
 
-exports.connect = function(port, password, cb) {
-    client = net.connect(port, function() {
+exports.connect = function(port, host, password, cb) {
+    function connect() {
         var err = false;
         self.write('init password=' + password + ',compression=off');
         // Ping test password 
@@ -36,7 +36,16 @@ exports.connect = function(port, password, cb) {
             }
         },
         100);
-    });
+    }
+
+    if (arguments.length === 4) {
+        client = net.connect(port, host, connect);
+    } else {
+        cb = password;
+        password = host;
+        client = net.connect(port, connect);
+    }
+
     client.on('error', function(err) {
         cb(err);
     });
@@ -118,7 +127,7 @@ exports.bufferlines = function(cb) {
                 lines.forEach(function(line) {
                     buffers.filter(function(buffer) {
                         return buffer.id.match(line.buffer);
-                    }).forEach(function(buffer){
+                    }).forEach(function(buffer) {
                         if (!buffer.lines) {
                             buffer.lines = [];
                         }
@@ -127,7 +136,7 @@ exports.bufferlines = function(cb) {
                 });
                 cb(buffers);
             });
-        });    
+        });
     }
 };
 
@@ -177,7 +186,7 @@ function onData(data) {
                             }
                             return p;
                         });
-                        if (o.buffer && !o.buffer.match(/^0x/)) {
+                        if (o.buffer && ! o.buffer.match(/^0x/)) {
                             o.buffer = '0x' + o.buffer;
                         }
                         cb(o, id);
