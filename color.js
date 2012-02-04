@@ -1,12 +1,12 @@
 // NOTE: This is a direct port of http://git.weechat.org/?p=qweechat.git;a=blob;f=src/qweechat/weechat/color.py
-var util = require('util');
+var format = require('format').format;
 
 var RE_COLOR_ATTRS = '[*!/_|]*',
-RE_COLOR_STD = util.format('(?:%s\\d{2})', RE_COLOR_ATTRS),
-RE_COLOR_EXT = util.format('(?:@%s\\d{5})', RE_COLOR_ATTRS),
-RE_COLOR_ANY = util.format('(?:%s|%s)', RE_COLOR_STD, RE_COLOR_EXT),
+RE_COLOR_STD = format('(?:%s\\d{2})', RE_COLOR_ATTRS),
+RE_COLOR_EXT = format('(?:@%s\\d{5})', RE_COLOR_ATTRS),
+RE_COLOR_ANY = format('(?:%s|%s)', RE_COLOR_STD, RE_COLOR_EXT),
 //# \x19: color code, \x1A: set attribute, \x1B: remove attribute, \x1C: reset
-RE_COLOR = util.format('(\\x19(?:\\d{2}|F%s|B\\d{2}|B@\\d{5}|\\\\*%s(,%s)?|@\\d{5}|b.|\\x1C))|\\x1A.|\\x1B.|\\x1C', RE_COLOR_ANY, RE_COLOR_ANY, RE_COLOR_ANY);
+RE_COLOR = format('(\\x19(?:\\d{2}|F%s|B\\d{2}|B@\\d{5}|\\\\*%s(,%s)?|@\\d{5}|b.|\\x1C))|\\x1A.|\\x1B.|\\x1C', RE_COLOR_ANY, RE_COLOR_ANY, RE_COLOR_ANY);
 
 var TERMINAL_COLORS = '000000cd000000cd00cdcd000000cdcd00cd00cdcde5e5e54d4d4dff000000ff00ffff000000ffff00ff00ffffffffff\
 00000000002a0000550000800000aa0000d4002a00002a2a002a55002a80002aaa002ad400550000552a005555005580\
@@ -37,13 +37,13 @@ function _rgb_color(index) {
     r = int(color.slice(0, 2), 16) * 0.85,
     g = int(color.slice(2, 4), 16) * 0.85,
     b = int(color.slice(4, 6), 16) * 0.85;
-    return util.format('%02x%02x%02x', r, g, b);
+    return format('%02x%02x%02x', r, g, b);
 }
 
 function _convert_weechat_color(color) {
     try {
         var index = int(color);
-        return util.format('\x01(Fr%s)', WEECHAT_BASIC_COLORS[index]);
+        return format('\x01(Fr%s)', WEECHAT_BASIC_COLORS[index]);
     } catch(e) {
         console.error('Error decoding WeeChat color "%s"', color, e);
         return '';
@@ -53,7 +53,7 @@ function _convert_weechat_color(color) {
 function _convert_terminal_color(fg_bg, attrs, color) {
     try {
         var index = int(color);
-        return util.format('\x01(%s%s#%s)', fg_bg, attrs, _rgb_color(index));
+        return format('\x01(%s%s#%s)', fg_bg, attrs, _rgb_color(index));
     } catch(e) {
         console.error('Error decoding terminal color "%s"', color, e);
         return '';
@@ -131,10 +131,10 @@ function _convert_color(match, i) {
         //pass
     } else if (color[0] === '\x1A') {
         //# set attribute
-        return util.format('\x01(+%s)', _attrcode_to_char(color[1]));
+        return format('\x01(+%s)', _attrcode_to_char(color[1]));
     } else if (color[0] === '\x1B') {
         //# remove attribute
-        return util.format('\x01(-%s)', _attrcode_to_char(color[1]));
+        return format('\x01(-%s)', _attrcode_to_char(color[1]));
     } else if (color[0] === '\x1C') {
         //# reset
         return '\x01(Fr)\x01(Br)';
