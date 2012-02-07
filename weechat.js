@@ -1,16 +1,26 @@
 var net = require('net'),
+events = require('events'),
 protocol = require('./protocol.js'),
 color = require('./color.js');
 
 var client, id = 0,
-callbacks = {},
-listeners = {},
+em = new events.EventEmitter(),
 self = this;
 
 var getbuffers = 'hdata buffer:gui_buffers(*) number,full_name,type,title,local_variables',
 getlines1 = 'hdata buffer:',
 getlines2 = '/own_lines/first_line(*)/data',
 getnicks = 'nicklist';
+
+var aliases = {
+    line: '_buffer_line_added',
+    open: '_buffer_opened',
+    close: '_buffer_closing',
+    renamed: '_buffer_renamed',
+    localvar: '_buffer_localvar_added',
+    title: '_buffer_title_change',
+    nicklist: '_nicklist'
+};
 
 // This should create styles in the future
 exports.style = function(line) {
@@ -56,15 +66,15 @@ exports.on = function(listener, cb) {
         cb = listener;
         listener = '*';
     }
-    if (!listeners[listener]) {
-        listeners[listener] = [];
+
+    if (aliases[listener]) {
+        em.on(aliases[listener], cb);
     }
-    listeners[listener].push(cb);
 };
 
 exports.write = function(msg, cb) {
     id++;
-    callbacks[id] = cb;
+    if (cb) em.once(id, cb);
     client.write('(' + id + ') ' + msg + '\n');
 };
 
@@ -140,62 +150,27 @@ exports.bufferlines = function(cb) {
     }
 };
 
-exports.onLine = function(cb) {
-    self.on('_buffer_line_added', cb);
-};
-
-exports.onOpen = function(cb) {
-    self.on('_buffer_opened', cb);
-};
-
-exports.onClose = function(cb) {
-    self.on('_buffer_closing', cb);
-};
-
-exports.onRenamed = function(cb) {
-    self.on('_buffer_renamed', cb);
-};
-
-exports.onLocalvar = function(cb) {
-    self.on('_buffer_localvar_added', cb);
-};
-
-exports.onTitle = function(cb) {
-    self.on('_buffer_title_change', cb);
-};
-
-exports.onNicklist = function(cb) {
-    self.on('_nicklist', cb);
-};
-
 function onData(data) {
     protocol.data(data, function(id, obj) {
-        cb = callbacks[id];
-        if (cb) {
-            cb(obj);
-            delete callbacks[id];
-        }
 
         [id, '*'].forEach(function(l) {
-            if (listeners[l]) {
-                listeners[l].forEach(function(cb) {
-                    if (Array.isArray(obj)) {
-                        obj.forEach(function(o) {
-                            o.pointers = o.pointers.map(function(p) {
-                                if (!p.match(/^0x/)) {
-                                    return '0x' + p;
-                                }
-                                return p;
-                            });
-                            if (o.buffer && ! o.buffer.match(/^0x/)) {
-                                o.buffer = '0x' + o.buffer;
-                            }
-                            cb(o, id);
-                        });
-                    } else {
-                        cb(obj, id);
+            if (Array.isArray(obj)) {
+                obj.forEach(function(o) {
+                    o.pointers = o.pointers.map(function(p) {
+                        if (!p.match(/^0x/)) {
+                            return '0x' + p;
+                        }
+                        return p;
+                    });
+                    if (o.buffer && ! o.buffer.match(/^0x/)) {
+                        o.buffer = '0x' + o.buffer;
                     }
+                    em.emit(l, o, id);
+                    //   cb(o, id);
                 });
+            } else {
+                em.emit(l, obj, id);
+                //cb(obj, id);
             }
         });
     });
