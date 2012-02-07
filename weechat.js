@@ -166,11 +166,9 @@ function onData(data) {
                         o.buffer = '0x' + o.buffer;
                     }
                     em.emit(l, o, id);
-                    //   cb(o, id);
                 });
             } else {
                 em.emit(l, obj, id);
-                //cb(obj, id);
             }
         });
     });
