@@ -36,6 +36,7 @@ exports.data = function(part, cb) {
     }
 
     if (partial.length >= total) {
+        var meh = partial.slice(total + 1);
         data = partial;
         total = 0;
         partial = '';
@@ -43,6 +44,7 @@ exports.data = function(part, cb) {
         if (cb) {
             cb(id, obj);
         }
+        this.data(meh, cb);
     }
 };
 
