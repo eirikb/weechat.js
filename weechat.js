@@ -179,18 +179,22 @@ function onData(data) {
         [id, '*'].forEach(function(l) {
             if (listeners[l]) {
                 listeners[l].forEach(function(cb) {
-                    obj.forEach(function(o) {
-                        o.pointers = o.pointers.map(function(p) {
-                            if (!p.match(/^0x/)) {
-                                return '0x' + p;
+                    if (Array.isArray(obj)) {
+                        obj.forEach(function(o) {
+                            o.pointers = o.pointers.map(function(p) {
+                                if (!p.match(/^0x/)) {
+                                    return '0x' + p;
+                                }
+                                return p;
+                            });
+                            if (o.buffer && ! o.buffer.match(/^0x/)) {
+                                o.buffer = '0x' + o.buffer;
                             }
-                            return p;
+                            cb(o, id);
                         });
-                        if (o.buffer && ! o.buffer.match(/^0x/)) {
-                            o.buffer = '0x' + o.buffer;
-                        }
-                        cb(o, id);
-                    });
+                    } else {
+                        cb(obj, id);
+                    }
                 });
             }
         });
