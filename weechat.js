@@ -67,6 +67,7 @@ exports.on = function(listener, cb) {
         listener = '*';
     }
 
+    em.on(listener, cb);
     if (aliases[listener]) {
         em.on(aliases[listener], cb);
     }
