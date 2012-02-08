@@ -1,4 +1,4 @@
-var data, client, partial, id, total = 0,
+var data, client, id, total = 0,
 types = {
     chr: getChar,
     int: getInt,
@@ -16,10 +16,11 @@ types = {
 };
 
 exports.data = function(part, cb) {
-    var tmpBuf, ret, obj;
-    data = part;
+    var tmp, ret, obj;
 
     if (total === 0) {
+        data = part;
+
         total = getInt();
         // Ignore compression for now
         getChar();
@@ -27,24 +28,22 @@ exports.data = function(part, cb) {
 
         // 9 is number of bytes already read
         total -= (9 + id.length);
-        partial = data;
     } else {
-        tmpBuf = new Buffer(partial.length + data.length);
-        partial.copy(tmpBuf);
-        data.copy(tmpBuf, partial.length);
-        partial = tmpBuf;
+        tmp = new Buffer(data.length + part.length);
+        data.copy(tmp);
+        part.copy(tmp, data.length);
+        data = tmp;
     }
 
-    if (partial.length >= total) {
-        var meh = partial.slice(total + 1);
-        data = partial;
-        total = 0;
-        partial = '';
+    if (data.length >= total) {
         obj = parse();
-        if (cb) {
-            cb(id, obj);
+        if (cb) cb(id, obj);
+        total = 0;
+
+        if (data.length > total) {
+            data = data.slice(total);
+            this.data(data, cb);
         }
-        this.data(meh, cb);
     }
 };
 
