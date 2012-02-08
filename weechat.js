@@ -82,7 +82,7 @@ exports.write = function(msg, cb) {
 exports.version = function(cb) {
     if (cb) {
         self.write('info version', function(v) {
-            cb(v.value);
+            cb(v[0].value);
         });
     }
 };
@@ -133,15 +133,15 @@ exports.lines = function(bufferid, cb) {
 
 exports.bufferlines = function(cb) {
     if (cb) {
-        self.buffers(function(buffers) {
-            self.lines(function(lines) {
-                lines.forEach(function(line) {
-                    buffers.filter(function(buffer) {
-                        return buffer.id.match(line.buffer);
-                    }).forEach(function(buffer) {
-                        if (!buffer.lines) {
-                            buffer.lines = [];
-                        }
+        self.lines(function(lines) {
+            self.buffers(function(buffers) {
+                buffers.forEach(function(buffer) {
+                    if (!buffer.lines) {
+                        buffer.lines = [];
+                    }
+                    lines.filter(function(line) {
+                        return line.buffer.match(buffer.id);
+                    }).forEach(function(line) {
                         buffer.lines.push(line);
                     });
                 });
@@ -152,25 +152,28 @@ exports.bufferlines = function(cb) {
 };
 
 function onData(data) {
+
     protocol.data(data, function(id, obj) {
+        if (!id) id = '';
 
         [id, '*'].forEach(function(l) {
-            if (Array.isArray(obj)) {
-                obj.forEach(function(o) {
+            if (!Array.isArray(obj)) obj = [obj];
+
+            obj = obj.map(function(o) {
+                if (o.pointers) {
                     o.pointers = o.pointers.map(function(p) {
                         if (!p.match(/^0x/)) {
                             return '0x' + p;
                         }
                         return p;
                     });
-                    if (o.buffer && ! o.buffer.match(/^0x/)) {
-                        o.buffer = '0x' + o.buffer;
-                    }
-                    em.emit(l, o, id);
-                });
-            } else {
-                em.emit(l, obj, id);
-            }
+                }
+                if (o.buffer && ! o.buffer.match(/^0x/)) {
+                    o.buffer = '0x' + o.buffer;
+                }
+                return o;
+            });
+            em.emit(l, obj, id);
         });
     });
 }
