@@ -96,38 +96,38 @@ weechat.bufferlines(function(buffers) {
 });
 ```
 
-There are some helper functions for easier listeners
+There are some aliases for easier listeners
 
 ```JavaScript
-weechat.onLine(function(line) {
+weechat.on('line', function(line) {
     console.log('Got a line', line);
 });
 
-weechat.onOpen(function(buffer) {
+weechat.on('open', function(buffer) {
     console.log('Buffer opened', buffer);
 });
 
-weechat.onClose(function(buffer) {
+weechat.on('close', function(buffer) {
     console.log('Buffer closed', buffer);
 });
 
-weechat.onRenamed(function(buffer) {
+weechat.on('renamed', function(buffer) {
     console.log('Buffer renamed', buffer);
 });
 
-weechat.onLocalvar(function(lv) {
+weechat.on('localvar', function(lv) {
     console.log('New/changed local variable', lv);
 });
 
-weechat.onTitle(function(buffer) {
+weechat.on('title', function(buffer) {
     console.log('Buffer got new title', buffer);
 });
 
-weechat.onNicklist(function(nicklist) {
+weechat.on('nicklist', function(nicklist) {
     console.log('Got nicklist', nicklist);
 });
 
-weechat.onVersion(function(version) {
+weechat.version(function(version) {
     console.log('Connected to WeeChat version:', version);
 });
 ```
