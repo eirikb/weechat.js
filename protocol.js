@@ -1,3 +1,6 @@
+//
+//  http://www.weechat.org/files/doc/devel/weechat_relay_protocol.en.html
+//
 var data, client, id, total = 0,
 types = {
     chr: getChar,
