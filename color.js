@@ -1,7 +1,6 @@
-//
 // http://weechat.org/files/doc/devel/weechat_dev.en.html#color_codes_in_strings
-//
-var part, fg, bg, attrs = [];
+var part, fg, bg, attrs = [],
+colors = ['', 'black', 'dark gray', 'dark red', 'light red', 'dark green', 'light green', 'brown', 'yellow', 'dark blue', 'light blue', 'dark magenta', 'light magenta', 'dark cyan', 'light cyan', 'gray', 'white'];
 
 function setAttrs() {
     while (part.match(/^\*|^\/|^\_|^\|/)) {
@@ -49,6 +48,10 @@ var prefixes = {
 };
 
 exports.parse = function(text) {
+    if (!text) {
+        console.log('ERROR!', text);
+        return text;
+    }
     var f, parts = text.split(/(\x19|\x1A|\x1B|\x1C)/);
 
     return parts.map(function(p) {
@@ -58,10 +61,12 @@ exports.parse = function(text) {
             f();
             res = {
                 text: part,
-                fg: fg,
-                bg: bg,
+                fg: colors[parseInt(fg, 10)],
+                bg: colors[parseInt(bg, 10)],
                 attrs: attrs
             };
+            if (!res.fg) res.fg = fg;
+            if (!res.bg) res.bg = bg;
         }
         f = tmp;
         return res;
