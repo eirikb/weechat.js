@@ -41,13 +41,14 @@ var prefixes = {
         }
     },
     '\x1A': function() {
-        console.log('Awesome! 2', part);
+        // Don't know what to do
     },
     '\x1B': function() {
-        console.log('Awesome! 3', part);
+        attrs = [];
     },
     '\x1C': function() {
-        console.log('Awesome! 4', part);
+        fg = '';
+        bg = '';
     }
 };
 
