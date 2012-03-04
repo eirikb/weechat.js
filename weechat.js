@@ -159,7 +159,7 @@ function onData(data) {
         [id, '*'].forEach(function(l) {
             if (!Array.isArray(obj)) obj = [obj];
 
-            obj.map(function(o) {
+            obj = obj.map(function(o) {
                 if (o.pointers) {
                     o.pointers = o.pointers.map(function(p) {
                         if (!p.match(/^0x/)) {
@@ -172,9 +172,8 @@ function onData(data) {
                     o.buffer = '0x' + o.buffer;
                 }
                 return o;
-            }).forEach(function(o) {
-                em.emit(l, o, id);
             });
+            em.emit(l, obj, id);
         });
     });
 }
