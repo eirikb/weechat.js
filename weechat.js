@@ -93,7 +93,7 @@ exports.buffers = function(cb) {
             buffers = buffers.map(function(buffer) {
                 var lv = buffer.local_variables;
                 return {
-                    id: '0x' + buffer.pointers[0],
+                    id: buffer.pointers[0],
                     number: buffer.number,
                     fullName: buffer.full_name,
                     typeId: buffer.type,
