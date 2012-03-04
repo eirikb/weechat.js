@@ -22,7 +22,6 @@ var aliases = {
     nicklist: '_nicklist'
 };
 
-// This should create styles in the future
 exports.style = function(line) {
     return color.parse(line);
 };
