@@ -151,7 +151,6 @@ exports.bufferlines = function(cb) {
 };
 
 function onData(data) {
-
     protocol.data(data, function(id, obj) {
         if (!id) id = '';
 
