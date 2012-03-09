@@ -4,8 +4,7 @@ protocol = require('./protocol.js'),
 color = require('./color.js');
 
 var id = 0,
-em = new events.EventEmitter(),
-self = this;
+em = new events.EventEmitter();
 
 var getbuffers = 'hdata buffer:gui_buffers(*) number,full_name,type,title,local_variables',
 getlines1 = 'hdata buffer:',
@@ -36,7 +35,9 @@ exports.connect = function(port, host, password, cb) {
 
 function WeeChat(port, host, password, cb) {
     if (! (this instanceof WeeChat)) return new WeeChat(port, host, password, cb);
-    var client = net.connect(port, host, password, function connect() {
+
+    var self = this,
+    client = net.connect(port, host, function connect() {
         var err = false;
         self.write('init password=' + password + ',compression=off');
         // Ping test password 
@@ -59,7 +60,7 @@ function WeeChat(port, host, password, cb) {
         cb(err);
     });
 
-    this.on = function(listener, cb) {
+    self.on = function(listener, cb) {
         if (arguments.length === 1) {
             cb = listener;
             listener = '*';
@@ -71,13 +72,13 @@ function WeeChat(port, host, password, cb) {
         }
     };
 
-    this.write = function(msg, cb) {
+    self.write = function(msg, cb) {
         id++;
         if (cb) em.once(id, cb);
         client.write('(' + id + ') ' + msg + '\n');
     };
 
-    this.version = function(cb) {
+    self.version = function(cb) {
         if (cb) {
             self.write('info version', function(v) {
                 cb(v[0].value);
@@ -85,7 +86,7 @@ function WeeChat(port, host, password, cb) {
         }
     };
 
-    this.buffers = function(cb) {
+    self.buffers = function(cb) {
         if (cb) {
             self.write(getbuffers, function(buffers) {
                 buffers = buffers.map(function(buffer) {
@@ -108,7 +109,7 @@ function WeeChat(port, host, password, cb) {
         }
     };
 
-    this.lines = function(bufferid, cb) {
+    self.lines = function(bufferid, cb) {
         if (arguments.length === 1) {
             cb = bufferid;
             bufferid = 'gui_buffers(*)';
@@ -129,7 +130,7 @@ function WeeChat(port, host, password, cb) {
         }
     };
 
-    this.bufferlines = function(cb) {
+    self.bufferlines = function(cb) {
         if (cb) {
             self.lines(function(lines) {
                 self.buffers(function(buffers) {
