@@ -151,29 +151,33 @@ function WeeChat(port, host, password, cb) {
     };
 
     function onData(data) {
-        protocol.data(data, function(id, obj) {
-            if (!id) id = '';
+        try {
+            protocol.data(data, function(id, obj) {
+                if (!id) id = '';
 
-            [id, '*'].forEach(function(l) {
-                if (!Array.isArray(obj)) obj = [obj];
+                [id, '*'].forEach(function(l) {
+                    if (!Array.isArray(obj)) obj = [obj];
 
-                obj = obj.map(function(o) {
-                    if (o.pointers) {
-                        o.pointers = o.pointers.map(function(p) {
-                            if (!p.match(/^0x/)) {
-                                return '0x' + p;
-                            }
-                            return p;
-                        });
-                    }
-                    if (o.buffer && ! o.buffer.match(/^0x/)) {
-                        o.buffer = '0x' + o.buffer;
-                    }
-                    return o;
+                    obj = obj.map(function(o) {
+                        if (o.pointers) {
+                            o.pointers = o.pointers.map(function(p) {
+                                if (!p.match(/^0x/)) {
+                                    return '0x' + p;
+                                }
+                                return p;
+                            });
+                        }
+                        if (o.buffer && ! o.buffer.match(/^0x/)) {
+                            o.buffer = '0x' + o.buffer;
+                        }
+                        return o;
+                    });
+                    em.emit(l, obj, id);
                 });
-                em.emit(l, obj, id);
             });
-        });
+        } catch(e) {
+            em.emit('error', e);
+        }
     }
 }
 
