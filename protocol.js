@@ -1,8 +1,8 @@
 //
 //  http://www.weechat.org/files/doc/devel/weechat_relay_protocol.en.html
 //
-var data, client, id, total = 0,
-types = {
+// data is side-effected variable used during parsing
+var data, types = {
     chr: getChar,
     int: getInt,
     // hacks
@@ -18,37 +18,46 @@ types = {
     inl: getInfolist
 };
 
-exports.data = function(part, cb) {
-    var tmp, ret, obj;
+exports.Parser = Parser;
 
-    if (total === 0) {
-        data = part;
+function Parser(cb) {
+    if (! (this instanceof Parser)) return new Parser(cb);
 
-        total = getInt();
-        // getInt is 4 bytes
-        total -= 4;
-    } else {
-        tmp = new Buffer(data.length + part.length);
-        data.copy(tmp);
-        part.copy(tmp, data.length);
-        data = tmp;
-    }
+    var totalData, id, tmp, obj, total = 0;
 
-    if (data.length >= total) {
-        // Ignore compression for now
-        getChar();
-        id = getString();
-
-        obj = parse();
-        if (cb) cb(id, obj);
-        total = 0;
-
-        if (data.length > total) {
-            data = data.slice(total);
-            this.data(data, cb);
+    this.onData = function(part) {
+        if (total === 0) {
+            data = totalData = part;
+            total = getInt();
+            // getInt is 4 bytes
+            //total -= 4;
+        } else {
+            tmp = new Buffer(totalData.length + part.length);
+            totalData.copy(tmp);
+            part.copy(tmp, totalData.length);
+            totalData = tmp;
         }
-    }
-};
+
+        if (totalData.length >= total) {
+            // Set data to be parsed
+            data = totalData;
+            // Remove total from data
+            getInt();
+            // Ignore compression for now
+            getChar();
+            id = getString();
+
+            obj = parse();
+            if (cb) cb(id, obj);
+            total = 0;
+
+            if (data.length > total) {
+                data = data.slice(total);
+                this.onData(data, cb);
+            }
+        }
+    };
+}
 
 // Helper
 function loop(range, cb) {
@@ -70,7 +79,7 @@ function runType(type) {
     if (types[type]) {
         return types[type]();
     } else {
-        throw 'Unkown type: ' + type;
+        throw new Error('Unknown type: ' + type);
     }
 }
 
