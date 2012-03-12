@@ -8,7 +8,7 @@ em = new events.EventEmitter();
 
 var getbuffers = 'hdata buffer:gui_buffers(*) number,full_name,type,title,local_variables',
 getlines1 = 'hdata buffer:',
-getlines2 = '/own_lines/first_line(*)/data',
+getlines2 = '/own_lines/first_line(10)/data',
 getnicks = 'nicklist';
 
 var aliases = {
@@ -22,7 +22,7 @@ var aliases = {
 };
 
 exports.style = function(line) {
-    return color.parse(line);
+    return color.parse(line) || [];
 };
 
 exports.connect = function(port, host, password, cb) {
@@ -54,7 +54,8 @@ function WeeChat(port, host, password, cb) {
                     try {
                         parser.onData(data);
                     } catch(err) {
-                        socket.emit('error', err);
+                        console.error(err);
+                        em.emit('error', err);
                     }
                 });
                 self.write('sync');
