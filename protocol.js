@@ -25,12 +25,8 @@ exports.data = function(part, cb) {
         data = part;
 
         total = getInt();
-        // Ignore compression for now
-        getChar();
-        id = getString();
-
-        // 9 is number of bytes already read
-        total -= (9 + id.length);
+        // getInt is 4 bytes
+        total -= 4;
     } else {
         tmp = new Buffer(data.length + part.length);
         data.copy(tmp);
@@ -39,6 +35,10 @@ exports.data = function(part, cb) {
     }
 
     if (data.length >= total) {
+        // Ignore compression for now
+        getChar();
+        id = getString();
+
         obj = parse();
         if (cb) cb(id, obj);
         total = 0;
