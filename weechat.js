@@ -38,7 +38,9 @@ function WeeChat(port, host, password, cb) {
 
     var self = this,
     client = net.connect(port, host, function connect() {
-        var err = false;
+        var err = false,
+        parser = new protocol.Parser(onParsed);
+
         self.write('init password=' + password + ',compression=off');
         // Ping test password 
         self.write('info version');
@@ -47,7 +49,14 @@ function WeeChat(port, host, password, cb) {
         });
         setTimeout(function() {
             if (!err) {
-                client.on('data', onData);
+
+                client.on('data', function(data) {
+                    try {
+                        parser.onData(data);
+                    } catch(err) {
+                        socket.emit('error', err);
+                    }
+                });
                 self.write('sync');
             }
             if (cb) {
@@ -150,34 +159,28 @@ function WeeChat(port, host, password, cb) {
         }
     };
 
-    function onData(data) {
-        try {
-            protocol.data(data, function(id, obj) {
-                if (!id) id = '';
+    function onParsed(id, obj) {
+        if (!id) id = '';
 
-                [id, '*'].forEach(function(l) {
-                    if (!Array.isArray(obj)) obj = [obj];
+        [id, '*'].forEach(function(l) {
+            if (!Array.isArray(obj)) obj = [obj];
 
-                    obj = obj.map(function(o) {
-                        if (o.pointers) {
-                            o.pointers = o.pointers.map(function(p) {
-                                if (!p.match(/^0x/)) {
-                                    return '0x' + p;
-                                }
-                                return p;
-                            });
+            obj = obj.map(function(o) {
+                if (o.pointers) {
+                    o.pointers = o.pointers.map(function(p) {
+                        if (!p.match(/^0x/)) {
+                            return '0x' + p;
                         }
-                        if (o.buffer && ! o.buffer.match(/^0x/)) {
-                            o.buffer = '0x' + o.buffer;
-                        }
-                        return o;
+                        return p;
                     });
-                    em.emit(l, obj, id);
-                });
+                }
+                if (o.buffer && ! o.buffer.match(/^0x/)) {
+                    o.buffer = '0x' + o.buffer;
+                }
+                return o;
             });
-        } catch(e) {
-            em.emit('error', e);
-        }
+            em.emit(l, obj, id);
+        });
     }
 }
 
