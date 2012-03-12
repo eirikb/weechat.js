@@ -8,7 +8,7 @@ var id = 0,
 em = new events.EventEmitter();
 
 var getbuffers = 'hdata buffer:gui_buffers(*) number,full_name,type,title,local_variables',
-getlines = 'hdata buffer:%s/own_lines/first_line(%s)/data',
+getlines = 'hdata buffer:%s/own_lines/last_line(-%s)/data',
 getnicks = 'nicklist';
 
 var aliases = {
@@ -139,6 +139,7 @@ function WeeChat(port, host, password, cb) {
                         message: line.message
                     };
                 });
+                lines.reverse();
                 cb(lines);
             });
         }
