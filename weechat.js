@@ -1,5 +1,6 @@
 var net = require('net'),
 events = require('events'),
+format = require('util').format,
 protocol = require('./protocol.js'),
 color = require('./color.js');
 
@@ -7,8 +8,7 @@ var id = 0,
 em = new events.EventEmitter();
 
 var getbuffers = 'hdata buffer:gui_buffers(*) number,full_name,type,title,local_variables',
-getlines1 = 'hdata buffer:',
-getlines2 = '/own_lines/first_line(10)/data',
+getlines = 'hdata buffer:%s/own_lines/first_line(%s)/data',
 getnicks = 'nicklist';
 
 var aliases = {
@@ -119,13 +119,17 @@ function WeeChat(port, host, password, cb) {
         }
     };
 
-    self.lines = function(bufferid, cb) {
+    self.lines = function(count, bufferid, cb) {
         if (arguments.length === 1) {
+            cb = count;
+            count = '*';
+        } else if (arguments.length === 2) {
             cb = bufferid;
-            bufferid = 'gui_buffers(*)';
         }
+        if (arguments.length < 3) bufferid = 'gui_buffers(*)';
+
         if (cb) {
-            self.write(getlines1 + bufferid + getlines2, function(lines) {
+            self.write(format(getlines, bufferid, count), function(lines) {
                 lines = lines.map(function(line) {
                     return {
                         buffer: '0x' + line.pointers[0],
@@ -140,9 +144,13 @@ function WeeChat(port, host, password, cb) {
         }
     };
 
-    self.bufferlines = function(cb) {
+    self.bufferlines = function(count, cb) {
+        if (arguments.length === 1) {
+            cb = count;
+            count = '*';
+        }
         if (cb) {
-            self.lines(function(lines) {
+            self.lines(count, function(lines) {
                 self.buffers(function(buffers) {
                     buffers.forEach(function(buffer) {
                         if (!buffer.lines) {
