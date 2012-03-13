@@ -1,8 +1,6 @@
 //
 //  http://www.weechat.org/files/doc/devel/weechat_relay_protocol.en.html
 //
-var zlib = require('zlib');
-
 // data is side-effected variable used during parsing
 var data, types = {
     chr: getChar,
@@ -20,61 +18,20 @@ var data, types = {
     inl: getInfolist
 };
 
-exports.Parser = Parser;
+// Map all types to exports
+Object.keys(types).forEach(function(name) {
+    var type = types[name];
+    exports[type.name] = type;
+});
 
-function Parser(cb) {
-    if (! (this instanceof Parser)) return new Parser(cb);
+exports.setData = function(d) {
+    data = d;
+};
 
-    var totalData, self = this,
-    total = 0;
+exports.getData = function() {
+    return data;
+};
 
-    function parseData(d, cb) {
-        data = d;
-        var id = getString(),
-        obj = parse();
-
-        if (cb) cb(id, obj);
-        total = 0;
-
-        if (data.length > total) {
-            data = data.slice(total);
-            self.onData(data, cb);
-        }
-    }
-
-    this.onData = function(part) {
-        var tmp, compression;
-
-        if (total === 0) {
-            data = totalData = part;
-            total = getInt();
-            // getInt is 4 bytes
-            //total -= 4;
-        } else {
-            tmp = new Buffer(totalData.length + part.length);
-            totalData.copy(tmp);
-            part.copy(tmp, totalData.length);
-            totalData = tmp;
-        }
-
-        if (totalData.length >= total) {
-            // Set data to be parsed
-            data = totalData;
-            // Remove total from data
-            getInt();
-            compression = getChar();
-            if (compression) {
-                zlib.unzip(data, function(err, data) {
-                    if (err) throw err;
-                    parseData(data, cb);
-                });
-            } else {
-                parseData(data, cb);
-            }
-
-        }
-    };
-}
 
 // Helper
 function loop(range, cb) {
@@ -84,13 +41,13 @@ function loop(range, cb) {
     }
 }
 
-function parse() {
+exports.parse = function() {
     var type;
     if (data.length < 3) {
         return null;
     }
     return runType(getType());
-}
+};
 
 function runType(type) {
     if (types[type]) {
