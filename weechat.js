@@ -4,9 +4,6 @@ format = require('util').format,
 protocol = require('./protocol.js'),
 color = require('./color.js');
 
-var id = 0,
-em = new events.EventEmitter();
-
 var getbuffers = 'hdata buffer:gui_buffers(*) number,full_name,type,title,local_variables',
 getlines = 'hdata buffer:%s/own_lines/last_line(-%s)/data',
 getnicks = 'nicklist';
@@ -37,6 +34,8 @@ function WeeChat(port, host, password, cb) {
     if (! (this instanceof WeeChat)) return new WeeChat(port, host, password, cb);
 
     var self = this,
+    id = 0,
+    em = new events.EventEmitter(),
     client = net.connect(port, host, function connect() {
         var err = false,
         parser = new protocol.Parser(onParsed);
