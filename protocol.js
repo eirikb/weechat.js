@@ -1,6 +1,8 @@
 //
 //  http://www.weechat.org/files/doc/devel/weechat_relay_protocol.en.html
 //
+var zlib = require('zlib');
+
 // data is side-effected variable used during parsing
 var data, types = {
     chr: getChar,
@@ -23,9 +25,26 @@ exports.Parser = Parser;
 function Parser(cb) {
     if (! (this instanceof Parser)) return new Parser(cb);
 
-    var totalData, id, tmp, obj, total = 0;
+    var totalData, self = this,
+    total = 0;
+
+    function parseData(d, cb) {
+        data = d;
+        var id = getString(),
+        obj = parse();
+
+        if (cb) cb(id, obj);
+        total = 0;
+
+        if (data.length > total) {
+            data = data.slice(total);
+            self.onData(data, cb);
+        }
+    }
 
     this.onData = function(part) {
+        var tmp, compression;
+
         if (total === 0) {
             data = totalData = part;
             total = getInt();
@@ -43,18 +62,16 @@ function Parser(cb) {
             data = totalData;
             // Remove total from data
             getInt();
-            // Ignore compression for now
-            getChar();
-            id = getString();
-
-            obj = parse();
-            if (cb) cb(id, obj);
-            total = 0;
-
-            if (data.length > total) {
-                data = data.slice(total);
-                this.onData(data, cb);
+            compression = getChar();
+            if (compression) {
+                zlib.unzip(data, function(err, data) {
+                    if (err) throw err;
+                    parseData(data, cb);
+                });
+            } else {
+                parseData(data, cb);
             }
+
         }
     };
 }

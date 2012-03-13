@@ -40,7 +40,7 @@ function WeeChat(port, host, password, cb) {
         var err = false,
         parser = new protocol.Parser(onParsed);
 
-        self.write('init password=' + password + ',compression=off');
+        self.write('init password=' + password);
         // Ping test password 
         self.write('info version');
         client.on('end', function() {
