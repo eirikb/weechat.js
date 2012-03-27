@@ -4,11 +4,12 @@ protocol = require('./protocol.js');
 exports.Parser = function Parser(cb) {
     if (! (this instanceof Parser)) return new Parser(cb);
 
-    var data, self = this,
+    var buffer = new Buffer(0),
     total = 0,
-    unzipping = false;
+    unzipping = false,
+    self = this;
 
-    function parseData(data, cb) {
+    function parseData(data) {
         protocol.setData(data);
         var id = protocol.getString(),
         obj = protocol.parse();
@@ -17,7 +18,7 @@ exports.Parser = function Parser(cb) {
         total = 0;
     }
 
-    function gotParts(data) {
+    function handleData(data) {
         protocol.setData(data);
         // Remove total from data
         protocol.getInt();
@@ -30,9 +31,11 @@ exports.Parser = function Parser(cb) {
                 unzipping = false;
                 if (err) throw err;
                 parseData(data, cb);
+                self.onData();
             });
         } else {
             parseData(data, cb);
+            self.onData();
         }
     }
 
@@ -43,28 +46,22 @@ exports.Parser = function Parser(cb) {
         return buffer;
     }
 
-    this.onData = function(part) {
-        var tmp, compression;
+    self.onData = function(part) {
+        var data;
 
-        if (unzipping || total !== 0) {
-            data = concatBuffers(data, part);
-        } else {
-            data = part;
-            protocol.setData(data);
-            total = protocol.getInt();
-        }
+        if (part) buffer = concatBuffers(buffer, part);
 
-        if (!unzipping && data.length >= total) {
-            tmp = null;
-            if (data.length > total) {
-                tmp = data.slice(0, total);
-                data = data.slice(total);
+        if (!unzipping) {
+            if (total === 0) {
+                protocol.setData(buffer);
+                total = protocol.getInt();
             }
 
-            gotParts(data);
-
-            if (tmp) {
-                self.onData(tmp);
+            // Ready to parse buffer
+            if (buffer.length > total) {
+                data = buffer.slice(0, total);
+                buffer = buffer.slice(total);
+                handleData(data);
             }
         }
     };
