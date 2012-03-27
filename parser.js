@@ -30,11 +30,11 @@ exports.Parser = function Parser(cb) {
             zlib.unzip(data, function(err, data) {
                 unzipping = false;
                 if (err) throw err;
-                parseData(data, cb);
+                parseData(data);
                 self.onData();
             });
         } else {
-            parseData(data, cb);
+            parseData(data);
             self.onData();
         }
     }
@@ -49,18 +49,25 @@ exports.Parser = function Parser(cb) {
     self.onData = function(part) {
         var data;
 
+        console.log('onData', part ? part.length : 'no part');
+
         if (part) buffer = concatBuffers(buffer, part);
 
-        if (!unzipping) {
+        // Need at least 1 int (4 bytes) in buffer
+        if (!unzipping && buffer.length > 4) {
             if (total === 0) {
                 protocol.setData(buffer);
                 total = protocol.getInt();
+                console.log('total', total);
             }
 
             // Ready to parse buffer
-            if (buffer.length > total) {
+            if (buffer.length >= total) {
+                console.log('buffer.length >= total');
                 data = buffer.slice(0, total);
                 buffer = buffer.slice(total);
+                total = 0;
+                console.log('buffer', buffer.length, 'data', data.length);
                 handleData(data);
             }
         }
