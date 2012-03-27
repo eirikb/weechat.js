@@ -47,24 +47,24 @@ exports.Parser = function Parser(cb) {
         var tmp, compression;
 
         if (unzipping || total !== 0) {
-            concatBuffers(data, part);
+            data = concatBuffers(data, part);
         } else {
             data = part;
             protocol.setData(data);
             total = protocol.getInt();
+        }
 
-            if (data.length >= total) {
-                tmp = null;
-                if (data.length > total) {
-                    tmp = data.slice(0, total);
-                    data = data.slice(total);
-                }
+        if (!unzipping && data.length >= total) {
+            tmp = null;
+            if (data.length > total) {
+                tmp = data.slice(0, total);
+                data = data.slice(total);
+            }
 
-                gotParts(data);
+            gotParts(data);
 
-                if (tmp) {
-                    self.onData(tmp);
-                }
+            if (tmp) {
+                self.onData(tmp);
             }
         }
     };
