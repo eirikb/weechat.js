@@ -141,3 +141,14 @@ function getInfolist() {
     throw 'Type not implemented: infolist';
 }
 
+function array() {
+    var type, count, values;
+
+    type = getType();
+    count = getInt();
+    values = [];
+    loop(count, function() {
+        values.push(runType(type));
+    });
+    return values;
+}
