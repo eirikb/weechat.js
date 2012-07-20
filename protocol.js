@@ -42,7 +42,6 @@ function loop(range, cb) {
 }
 
 exports.parse = function() {
-    var type;
     if (data.length < 3) {
         return null;
     }
@@ -88,7 +87,7 @@ function getPointer() {
 }
 
 function getHashtable() {
-    var i, typeKeys = getType(),
+    var typeKeys = getType(),
     typeValues = getType(),
     count = getInt(),
     obj = {};
@@ -113,6 +112,7 @@ function getHdata() {
 
     loop(count, function() {
         var tmp = {};
+        // TODO: Why is path not used here?
         tmp.pointers = paths.map(function(path) {
             return getPointer();
         });
