@@ -1,7 +1,7 @@
 var net = require('net');
 var events = require('events');
 var format = require('util').format;
-var parser = require('./parser.js');
+var Parser = require('./parser.js');
 var color = require('./color.js');
 
 var getbuffers = 'hdata buffer:gui_buffers(*) number,full_name,type,title,local_variables';
@@ -20,23 +20,21 @@ var aliases = {
 
 module.exports = WeeChat;
 
-/*
-exports.style = function(line) {
-    return color.parse(line) || [];
-};
-*/
-
-function WeeChat(settings) {
-    if (! (this instanceof WeeChat)) return new WeeChat(port, host, password, cb);
+function WeeChat() {
+    if (! (this instanceof WeeChat)) return new WeeChat();
 
     var self = this;
     var id = 0;
     var em = new events.EventEmitter();
 
+    self.style = function(line) {
+        return color.parse(line) || [];
+    };
+
     self.connect = function(host, port, password, cb) {
         client = net.connect(port, host, function connect() {
             var err = false;
-            var p = new parser.Parser(onParsed);
+            var parser = new Parser(onParsed);
 
             self.write('init password=' + password);
             // Ping test password 
@@ -49,7 +47,7 @@ function WeeChat(settings) {
 
                     client.on('data', function(data) {
                         try {
-                            p.onData(data);
+                            parser.onData(data);
                         } catch(err) {
                             console.error(err);
                             em.emit('error', err);
