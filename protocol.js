@@ -15,7 +15,8 @@ var data, types = {
     htb: getHashtable,
     hda: getHdata,
     inf: getInfo,
-    inl: getInfolist
+    inl: getInfolist,
+    arr: array
 };
 
 // Map all types to exports

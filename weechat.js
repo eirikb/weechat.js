@@ -1,12 +1,12 @@
-var net = require('net'),
-events = require('events'),
-format = require('util').format,
-parser = require('./parser.js'),
-color = require('./color.js');
+var net = require('net');
+var events = require('events');
+var format = require('util').format;
+var parser = require('./parser.js');
+var color = require('./color.js');
 
-var getbuffers = 'hdata buffer:gui_buffers(*) number,full_name,type,title,local_variables',
-getlines = 'hdata buffer:%s/own_lines/last_line(-%s)/data',
-getnicks = 'nicklist';
+var getbuffers = 'hdata buffer:gui_buffers(*) number,full_name,type,title,local_variables';
+var getlines = 'hdata buffer:%s/own_lines/last_line(-%s)/data';
+var getnicks = 'nicklist';
 
 var aliases = {
     line: '_buffer_line_added',
@@ -18,56 +18,55 @@ var aliases = {
     nicklist: '_nicklist'
 };
 
+module.exports = WeeChat;
+
+/*
 exports.style = function(line) {
     return color.parse(line) || [];
 };
+*/
 
-exports.connect = function(port, host, password, cb) {
-    if (arguments.length === 3) {
-        cb = password;
-        password = host;
-    }
-    return new WeeChat(port, host, password, cb);
-};
-
-function WeeChat(port, host, password, cb) {
+function WeeChat(settings) {
     if (! (this instanceof WeeChat)) return new WeeChat(port, host, password, cb);
 
-    var self = this,
-    id = 0,
-    em = new events.EventEmitter(),
-    client = net.connect(port, host, function connect() {
-        var err = false,
-        p = new parser.Parser(onParsed);
+    var self = this;
+    var id = 0;
+    var em = new events.EventEmitter();
 
-        self.write('init password=' + password);
-        // Ping test password 
-        self.write('info version');
-        client.on('end', function() {
-            err = 'Wrong password';
+    self.connect = function(host, port, password, cb) {
+        client = net.connect(port, host, function connect() {
+            var err = false;
+            var p = new parser.Parser(onParsed);
+
+            self.write('init password=' + password);
+            // Ping test password 
+            self.write('info version');
+            client.on('end', function() {
+                err = 'Wrong password';
+            });
+            setTimeout(function() {
+                if (!err) {
+
+                    client.on('data', function(data) {
+                        try {
+                            p.onData(data);
+                        } catch(err) {
+                            console.error(err);
+                            em.emit('error', err);
+                        }
+                    });
+                    self.write('sync');
+                }
+                if (cb) {
+                    cb(err);
+                }
+            },
+            100);
         });
-        setTimeout(function() {
-            if (!err) {
-
-                client.on('data', function(data) {
-                    try {
-                        p.onData(data);
-                    } catch(err) {
-                        console.error(err);
-                        em.emit('error', err);
-                    }
-                });
-                self.write('sync');
-            }
-            if (cb) {
-                cb(err);
-            }
-        },
-        100);
-    });
-    client.on('error', function(err) {
-        cb(err);
-    });
+        client.on('error', function(err) {
+            cb(err);
+        });
+    };
 
     self.on = function(listener, cb) {
         if (arguments.length === 1) {
@@ -96,26 +95,25 @@ function WeeChat(port, host, password, cb) {
     };
 
     self.buffers = function(cb) {
-        if (cb) {
-            self.write(getbuffers, function(buffers) {
-                buffers = buffers.map(function(buffer) {
-                    var lv = buffer.local_variables;
-                    return {
-                        id: buffer.pointers[0],
-                        number: buffer.number,
-                        fullName: buffer.full_name,
-                        typeId: buffer.type,
-                        title: buffer.title,
-                        plugin: lv.plugin,
-                        channel: lv.channel,
-                        nick: lv.nick,
-                        type: lv.type,
-                        name: lv.name
-                    };
-                });
-                cb(buffers);
+        if (!cb) return;
+        self.write(getbuffers, function(buffers) {
+            buffers = buffers.map(function(buffer) {
+                var lv = buffer.local_variables;
+                return {
+                    id: buffer.pointers[0],
+                    number: buffer.number,
+                    fullName: buffer.full_name,
+                    typeId: buffer.type,
+                    title: buffer.title,
+                    plugin: lv.plugin,
+                    channel: lv.channel,
+                    nick: lv.nick,
+                    type: lv.type,
+                    name: lv.name
+                };
             });
-        }
+            cb(buffers);
+        });
     };
 
     self.lines = function(count, bufferid, cb) {
