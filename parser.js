@@ -1,13 +1,18 @@
-var zlib = require('zlib'),
-protocol = require('./protocol.js');
+var zlib = require('zlib');
+var Protocol = require('./protocol.js');
 
-exports.Parser = function Parser(cb) {
+
+module.exports = Parser;
+
+function Parser(cb) {
     if (! (this instanceof Parser)) return new Parser(cb);
 
-    var buffer = new Buffer(0),
-    total = 0,
-    unzipping = false,
-    self = this;
+    var self = this;
+    var buffer = new Buffer(0);
+    var total = 0;
+    var unzipping = false;
+    var protocol = new Protocol();
+    
 
     function parseData(data) {
         protocol.setData(data);
@@ -49,8 +54,6 @@ exports.Parser = function Parser(cb) {
     self.onData = function(part) {
         var data;
 
-        console.log('onData', part ? part.length : 'no part');
-
         if (part) buffer = concatBuffers(buffer, part);
 
         // Need at least 1 int (4 bytes) in buffer
@@ -58,16 +61,13 @@ exports.Parser = function Parser(cb) {
             if (total === 0) {
                 protocol.setData(buffer);
                 total = protocol.getInt();
-                console.log('total', total);
             }
 
             // Ready to parse buffer
             if (buffer.length >= total) {
-                console.log('buffer.length >= total');
                 data = buffer.slice(0, total);
                 buffer = buffer.slice(total);
                 total = 0;
-                console.log('buffer', buffer.length, 'data', data.length);
                 handleData(data);
             }
         }
