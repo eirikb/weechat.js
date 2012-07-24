@@ -13,32 +13,27 @@ Usage
 ---
 
 ```JavaScript
-var weechat = require('weechat');
+var WeeChat = require('weechat');
 
-// Can only connect to localhost
-// First argument is port, second is password
-weechat.connect(8000, 'test', function(err) {
+var weeChat = new WeeChat();
+weeChat.connect('localhost', 8000, 'test', function(err) {
     if (!err) {
         console.log('Connected!');
 
-        weechat.version(function(version) {
-            console.log('WeeChat version:', version);
+        weeChat.write('info version', function(data) {
+            console.log(data[0].value);
         });
-
-        weechat.onLine(function(line) {
-            var m = weechat.style(line.message);
-            console.log('Got line', m);
+        // Some commands are mapped
+        weeChat.version(function(version) {
+            console.log(version);
         });
+    } else {
+        console.log(err);
     }
 });
-```
 
-Connect to different host:
-
-```JavaScript
-var weechat = require('weechat');
-
-weechat.connect(8000, '10.0.0.10', 'test', function(err) {
+weeChat.on(function(data, id){
+    console.log(data, id);
 });
 ```
 
@@ -49,7 +44,7 @@ At the moment the module return only pure WeeChat strings, including coding for 
 The module supports stripping these codes away using
 
 ```JavaScript
-weechat.style(line);
+weeChat.style(line);
 ```
 
 Will support real color parsing in the future.  
@@ -61,73 +56,17 @@ Interaction
 __.write__ is used to send messages to WeeChat, like this:
 
 ```JavaScript
-weechat.write('input irc.freenode.#weechat hello guys!');
+weeChat.write('input irc.freenode.#weechat hello guys!');
 ```
 
 Results are asynchronous:
 
 ```JavaScript
-weechat.write('info version', function(data) {
-    console.log('key %s with value %s', data.key, data.value);
+weeChat.write('info version', function(data) {
+    console.log('key %s with value %s', data[0].key, data[0].value);
 });
 
-weechat.write('_buffer_line_added', function(data) {
-    console.log('Got a line', data);
-});
-```
-
-Helper functions
----
-
-Get all buffers including lines:
-
-```JavaScript
-weechat.bufferlines(function(buffers) {
-    buffers.forEach(function(buffer) {
-        buffer.lines = buffer.lines.map(function(line) {
-            return {
-                prefix: weechat.style(line.prefix),
-                message: weechat.style(line.message)
-            };
-        });
-
-        console.log('Buffer', buffer.id, 'with lines', buffer.lines);
-    });
-});
-```
-
-There are some aliases for easier listeners
-
-```JavaScript
-weechat.on('line', function(line) {
-    console.log('Got a line', line);
-});
-
-weechat.on('open', function(buffer) {
-    console.log('Buffer opened', buffer);
-});
-
-weechat.on('close', function(buffer) {
-    console.log('Buffer closed', buffer);
-});
-
-weechat.on('renamed', function(buffer) {
-    console.log('Buffer renamed', buffer);
-});
-
-weechat.on('localvar', function(lv) {
-    console.log('New/changed local variable', lv);
-});
-
-weechat.on('title', function(buffer) {
-    console.log('Buffer got new title', buffer);
-});
-
-weechat.on('nicklist', function(nicklist) {
-    console.log('Got nicklist', nicklist);
-});
-
-weechat.version(function(version) {
-    console.log('Connected to WeeChat version:', version);
+weeChat.write('_buffer_line_added', function(data) {
+    console.log('Got lines', data);
 });
 ```
