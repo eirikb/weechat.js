@@ -1,23 +1,17 @@
 var zlib = require('zlib');
 var Protocol = require('./protocol.js');
 
-
-module.exports = Parser;
-
 function Parser(cb) {
-    if (! (this instanceof Parser)) return new Parser(cb);
-
     var self = this;
     var buffer = new Buffer(0);
     var total = 0;
     var unzipping = false;
     var protocol = new Protocol();
-    
 
     function parseData(data) {
         protocol.setData(data);
         var id = protocol.getString(),
-        obj = protocol.parse();
+            obj = protocol.parse();
 
         if (cb) cb(id, obj);
         total = 0;
@@ -72,5 +66,6 @@ function Parser(cb) {
             }
         }
     };
-};
+}
 
+module.exports = Parser;

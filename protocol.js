@@ -1,8 +1,6 @@
 //
 //  http://www.weechat.org/files/doc/devel/weechat_relay_protocol.en.html
 //
-// Data is side-effected variable
-
 // Helper
 function loop(range, cb) {
     var i;
@@ -11,11 +9,7 @@ function loop(range, cb) {
     }
 }
 
-module.exports = Protocol;
-
 function Protocol() {
-    if (! (this instanceof Protocol)) return new Protocol();
-
     var self = this;
     var data;
     var types = {
@@ -41,21 +35,6 @@ function Protocol() {
         self[type.name] = type;
     });
 
-    self.setData = function(d) {
-        data = d;
-    };
-
-    self.getData = function() {
-        return data;
-    };
-
-    self.parse = function() {
-        if (data.length < 3) {
-            return null;
-        }
-        return runType(getType());
-    };
-
     function runType(type) {
         if (types[type]) {
             return types[type]();
@@ -73,12 +52,12 @@ function Protocol() {
     function getInt() {
         var i = ((data[0] & 0xff) << 24) | ((data[1] & 0xff) << 16) | ((data[2] & 0xff) << 8) | (data[3] & 0xff);
         data = data.slice(4);
-        return i >= 0 ? i: null;
+        return i >= 0 ? i : null;
     }
 
     function getString() {
         var l = getInt(),
-        s = data.slice(0, l);
+            s = data.slice(0, l);
         data = data.slice(l);
         return s.toString();
     }
@@ -89,16 +68,16 @@ function Protocol() {
 
     function getPointer() {
         var l = data[0],
-        pointer = data.slice(1, l + 1);
+            pointer = data.slice(1, l + 1);
         data = data.slice(l + 1);
         return pointer.toString();
     }
 
     function getHashtable() {
         var typeKeys = getType(),
-        typeValues = getType(),
-        count = getInt(),
-        obj = {};
+            typeValues = getType(),
+            count = getInt(),
+            obj = {};
 
         loop(count, function() {
             obj[types[typeKeys]()] = runType(typeValues);
@@ -108,7 +87,7 @@ function Protocol() {
 
     function getHdata() {
         var keys, paths, count, objs = [],
-        hpath = getString();
+            hpath = getString();
 
         keys = getString().split(',');
         paths = hpath.split('/');
@@ -160,5 +139,21 @@ function Protocol() {
         });
         return values;
     }
+
+    self.setData = function(d) {
+        data = d;
+    };
+
+    self.getData = function() {
+        return data;
+    };
+
+    self.parse = function() {
+        if (data.length < 3) {
+            return null;
+        }
+        return runType(getType());
+    };
 }
 
+module.exports = Protocol;
