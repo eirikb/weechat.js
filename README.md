@@ -21,11 +21,11 @@ var client = weechat.connect('localhost', 8000, 'test', function() {
 });
 ```
 
-__.send(message, [callbakc])__  
+__.send(message, [callback])__  
 Send messages to WeeChat:
 
 ```JavaScript
-client.send('input irc.freenode.#weechat hello guys!');
+client.send('input irc.freenode.#weechat hello guys and girls!');
 
 client.send('info version', function(version) {
     console.log(version.value);
@@ -33,7 +33,7 @@ client.send('info version', function(version) {
 ```
 
 __.on([type], callback)__ 
-Listeners, when an even occures in WeeChat:
+Listeners, when an even occurs in WeeChat:
 
 ```JavaScript
 client.on('_buffer_line_added', function(line) {
