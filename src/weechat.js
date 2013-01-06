@@ -28,10 +28,8 @@ function noStyle(line) {
     return line;
 }
 
-function Client(host, port, password, cb) {
-    if (!(this instanceof Client)) return new Client(host, port, password, cb);
-
-    var self = this;
+function connect(host, port, password, cb) {
+    var self = {};
     var id = 0;
     var em = new events.EventEmitter();
     var parser = new Parser(onParsed);
@@ -68,7 +66,7 @@ function Client(host, port, password, cb) {
         self.send('info version', function() {
             connected = true;
             self.send('sync');
-            cb();
+            if (cb) cb();
         });
     });
 
@@ -106,8 +104,10 @@ function Client(host, port, password, cb) {
         if (cb) em.once(id, cb);
         client.write('(' + id + ') ' + msg + '\n');
     };
+
+    return self;
 }
 
 exports.style = style;
 exports.noStyle = noStyle;
-exports.Client = Client;
+exports.connect = connect;
