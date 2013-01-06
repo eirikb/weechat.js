@@ -13,60 +13,79 @@ Usage
 ---
 
 ```JavaScript
+var weechat = require('./weechat.js');
+
+var client = new weechat.Client('localhost', 8000, 'test', function() {
+    console.log('Connected!');
+
+    client.send('info version', function(version) {
+        console.log(version.value);
+    });
+});
+
+client.on('error', function(err) {
+    console.error(err);
+});
+
+client.on('end', function() {
+    console.log('end');
+});
+
+client.on('line', function(line) {
+    var from = weechat.noStyle(line.prefix);
+    var message = weechat.noStyle(line.message);
+
+    console.log(from, message);
+});
 var WeeChat = require('weechat');
 
-var weeChat = new WeeChat();
-weeChat.connect('localhost', 8000, 'test', function(err) {
-    if (!err) {
-        console.log('Connected!');
-
-        weeChat.write('info version', function(data) {
-            console.log(data[0].value);
-        });
-        // Some commands are mapped
-        weeChat.version(function(version) {
-            console.log(version);
-        });
-    } else {
-        console.log(err);
-    }
-});
-
-weeChat.on(function(data, id){
-    console.log(data, id);
-});
 ```
 
 Colorizing
 ---
 
-At the moment the module return only pure WeeChat strings, including coding for colors.   
-The module supports stripping these codes away using
-
+At the moment the module return only pure WeeChat strings, including coding for colors.  
+Calling `weechat.style(line);` will return an array of `parts`, like this:
 ```JavaScript
-weeChat.style(line);
+[ { text: 'Hello', fg: 'dark cyan', bg: undefined, attrs: [] },
+  { text: 'world!' } ]
 ```
 
-Will support real color parsing in the future.  
-Note that since a WeeChat string can contain many styles it will be split into 'parts'.
+`fg` is foreground color, `bg` is background color, `attrs` is an array of attributes, such as underline.
+
+The module supports stripping these codes away, returning a plain string, like this:
+```JavaScript
+weechat.noStyle(line);
+```
 
 Interaction
 ---
 
-__.write__ is used to send messages to WeeChat, like this:
+__.send__ is used to send messages to WeeChat, like this:
 
 ```JavaScript
-weeChat.write('input irc.freenode.#weechat hello guys!');
+client.send('input irc.freenode.#weechat hello guys!');
 ```
 
 Results are asynchronous:
 
 ```JavaScript
-weeChat.write('info version', function(data) {
-    console.log('key %s with value %s', data[0].key, data[0].value);
+client.send('info version', function(version) {
+    console.log('version is', version.value);
 });
 
-weeChat.write('_buffer_line_added', function(data) {
-    console.log('Got lines', data);
+weeChat.send('_buffer_line_added', function(line) {
+    console.log('Got line', line);
 });
 ```
+
+Built in listeners
+---
+There are some built in aliases making listeners easier to add:  
+__line__: New line added   
+__open__: Buffer is opened  
+__close__: Buffer is closing  
+__renamed__: Buffer is renamed   
+__localvar__: Local var is added  
+__title__: Title (topic) is changed for a buffer  
+__nicklist__: Nicklist
