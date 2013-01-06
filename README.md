@@ -37,8 +37,6 @@ client.on('line', function(line) {
 
     console.log(from, message);
 });
-var WeeChat = require('weechat');
-
 ```
 
 Colorizing
@@ -73,8 +71,13 @@ Results are asynchronous:
 client.send('info version', function(version) {
     console.log('version is', version.value);
 });
+```
 
-weeChat.send('_buffer_line_added', function(line) {
+__.on__ is used for listeners, when an even occures in WeeChat.  
+They can be added like this:  
+
+```JavaScript
+client.on('_buffer_line_added', function(line) {
     console.log('Got line', line);
 });
 ```
