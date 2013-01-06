@@ -55,6 +55,7 @@ function Client(host, port, password, cb) {
         self.send('init password=' + password);
         self.send('info version', function() {
             connected = true;
+            self.send('sync');
             cb();
         });
     });
