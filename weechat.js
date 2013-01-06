@@ -18,6 +18,16 @@ function style(line) {
     return color.parse(line) || [];
 }
 
+function noStyle(line) {
+    var parts = style(line);
+
+    line = parts.map(function(part) {
+        return part.text;
+    }).join('');
+
+    return line;
+}
+
 function Client(host, port, password, cb) {
     if (!(this instanceof Client)) return new Client(host, port, password, cb);
 
@@ -47,6 +57,8 @@ function Client(host, port, password, cb) {
                 }
                 return o;
             });
+            if (obj.length === 1) obj = obj[0];
+
             em.emit(l, obj, id);
         });
     }
@@ -97,4 +109,5 @@ function Client(host, port, password, cb) {
 }
 
 exports.style = style;
+exports.noStyle = noStyle;
 exports.Client = Client;
