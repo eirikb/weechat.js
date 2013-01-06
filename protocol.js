@@ -56,8 +56,9 @@ function Protocol() {
     }
 
     function getString() {
-        var l = getInt(),
-            s = data.slice(0, l);
+        var l = getInt();
+        var s = data.slice(0, l);
+
         data = data.slice(l);
         return s.toString();
     }
@@ -67,17 +68,18 @@ function Protocol() {
     }
 
     function getPointer() {
-        var l = data[0],
-            pointer = data.slice(1, l + 1);
+        var l = data[0];
+        var pointer = data.slice(1, l + 1);
+
         data = data.slice(l + 1);
         return pointer.toString();
     }
 
     function getHashtable() {
-        var typeKeys = getType(),
-            typeValues = getType(),
-            count = getInt(),
-            obj = {};
+        var typeKeys = getType();
+        var typeValues = getType();
+        var count = getInt();
+        var obj = {};
 
         loop(count, function() {
             obj[types[typeKeys]()] = runType(typeValues);
@@ -86,8 +88,11 @@ function Protocol() {
     }
 
     function getHdata() {
-        var keys, paths, count, objs = [],
-            hpath = getString();
+        var keys;
+        var paths;
+        var count;
+        var objs = [];
+        var hpath = getString();
 
         keys = getString().split(',');
         paths = hpath.split('/');
@@ -129,7 +134,9 @@ function Protocol() {
     }
 
     function array() {
-        var type, count, values;
+        var type;
+        var count;
+        var values;
 
         type = getType();
         count = getInt();
