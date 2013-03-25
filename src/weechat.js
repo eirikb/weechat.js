@@ -105,6 +105,10 @@ function connect(host, port, password, cb) {
         client.write('(' + id + ') ' + msg + '\n');
     };
 
+    self.disconnect = function() {
+      client.destroy();
+    };
+
     return self;
 }
 
