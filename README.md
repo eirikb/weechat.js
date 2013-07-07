@@ -13,10 +13,18 @@ Usage
 ---
 
 __.connect(host, port, password, [callback])__  
-Connect to WeeChat:
+Connect to WeeChat:  
+(host, port password, ssl, callback)
 
 ```JavaScript
-var client = weechat.connect('localhost', 8000, 'test', function() {
+var client = weechat.connect('localhost', 8000, 'test', false, function() {
+    console.log('Connected!');
+});
+```
+
+Or with [SSL support](http://dev.weechat.org/post/2012/07/27/SSL-in-Relay-plugin):
+```JavaScript
+var client = weechat.connect('localhost', 9001, 'test', true, function() {
     console.log('Connected!');
 });
 ```
@@ -80,9 +88,9 @@ Full example
 ---
 
 ```JavaScript
-var weechat = require('./weechat.js');
+var weechat = require('weechat');
 
-var client = weechat.Client('localhost', 8000, 'test', function() {
+var client = weechat.connect('localhost', 8000, 'test', function() {
     console.log('Connected!');
 
     client.send('info version', function(version) {
