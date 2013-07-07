@@ -1,4 +1,5 @@
 var net = require('net');
+var tls = require('tls');
 var events = require('events');
 var format = require('util').format;
 var Parser = require('./parser.js');
@@ -28,7 +29,7 @@ function noStyle(line) {
     return line;
 }
 
-function connect(host, port, password, cb) {
+function connect(host, port, password, ssl, cb) {
     var self = {};
     var id = 0;
     var em = new events.EventEmitter();
@@ -61,14 +62,23 @@ function connect(host, port, password, cb) {
         });
     }
 
-    var client = net.connect(port, host, function() {
+    function onConnect() {
         self.send('init password=' + password);
         self.send('info version', function() {
             connected = true;
             self.send('sync');
             if (cb) cb();
         });
-    });
+    }
+
+    var client;
+    if (ssl) {
+        client = tls.connect(port, host, {
+            rejectUnauthorized: false
+        }, onConnect);
+    } else {
+        client = net.connect(port, host, onConnect);
+    }
 
     client.on('data', function(data) {
         try {
