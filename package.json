@@ -1,12 +1,11 @@
 {
-    "name": "weechat",
-    "author": "Eirik Brandtzæg <eirikb@eirikb.no>",
-    "main": "src/weechat.js",
-    "version": "0.0.16",
-    "description": "WeeChat Relay Protocol",
-    "repository": {
-        "type": "git", 
-        "url": "https://github.com/eirikb/weechat.js"
-    }
+  "name": "weechat",
+  "author": "Eirik Brandtzæg <eirikb@eirikb.no>",
+  "main": "src/weechat.js",
+  "version": "0.0.16",
+  "description": "WeeChat Relay Protocol",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eirikb/weechat.js"
+  }
 }
-
