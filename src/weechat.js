@@ -36,6 +36,12 @@ function connect(host, port, password, ssl, cb) {
   var parser = new Parser(onParsed);
   var connected = false;
 
+  var timeout = setTimeout(function() {
+    var err = new Error('Connect/handshake timeout');
+    err.code = 'TIMEOUT';
+    em.emit('error', err);
+  }, 10000);
+
   function onParsed(id, obj) {
     if (!id) id = '';
 
@@ -63,6 +69,7 @@ function connect(host, port, password, ssl, cb) {
   }
 
   function onConnect() {
+    clearTimeout(timeout);
     self.send('init password=' + password);
     self.send('info version', function() {
       connected = true;
@@ -71,7 +78,6 @@ function connect(host, port, password, ssl, cb) {
     });
   }
 
-  var client;
   if (ssl) {
     client = tls.connect(port, host, {
       rejectUnauthorized: false
@@ -89,10 +95,12 @@ function connect(host, port, password, ssl, cb) {
   });
 
   client.on('error', function(err) {
+    clearTimeout(timeout);
     em.emit('error', err);
   });
 
   client.on('end', function() {
+    clearTimeout(timeout);
     if (!connected) {
       var err = new Error('Wrong password');
       err.code = 'WRONGPASS';
