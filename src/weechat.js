@@ -35,6 +35,7 @@ function connect(host, port, password, ssl, cb) {
   var em = new events.EventEmitter();
   var parser = new Parser(onParsed);
   var connected = false;
+  var client;
 
   var timeout = setTimeout(function() {
     var err = new Error('Connect/handshake timeout');
