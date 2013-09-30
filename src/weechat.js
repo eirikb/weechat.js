@@ -93,8 +93,13 @@ function connect(host, port, password, ssl, cb) {
   });
 
   client.on('end', function() {
-    if (!connected) em.emit('error', new Error('Wrong password'));
-    else em.emit('end');
+    if (!connected) {
+      var err = new Error('Wrong password');
+      err.code = 'WRONGPASS';
+      em.emit('error', err);
+    } else {
+      em.emit('end');
+    }
   });
 
   self.on = function(listener, cb) {
