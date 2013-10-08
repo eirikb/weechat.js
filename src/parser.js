@@ -1,9 +1,7 @@
-(function(exports) {
+(function() {
   var zlib;
-  var Protocol;
   if (this.require) {
     zlib = require('zlib');
-    Protocol = require('./protocol.js');
   }
 
   function Parser(cb) {
@@ -30,6 +28,9 @@
       data = protocol.getData();
 
       if (compression) {
+        if (!zlib) {
+          throw new Error('Zlib is currently not available');
+        }
         unzipping = true;
         zlib.unzip(data, function(err, data) {
           unzipping = false;
@@ -74,4 +75,4 @@
   }
 
   exports.Parser = Parser;
-})(typeof exports === 'undefined' ? this.parser = {} : exports);
+})();

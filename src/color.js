@@ -1,6 +1,6 @@
 // http://weechat.org/files/doc/devel/weechat_dev.en.html#color_codes_in_strings
 
-(function(exports) {
+(function() {
   var part, fg, bg, attrs;
 
   // XTerm 8-bit pallete
@@ -77,7 +77,6 @@
     return c;
   }
 
-
   var prefixes = {
     '\x19': function() {
       if (part.match(/^F/)) {
@@ -138,7 +137,7 @@
     }).filter(function(p) {
       return p;
     });
-  };
+  }
 
-  exports.parse = parse;
-})(typeof exports === 'undefined' ? this.color = {} : exports);
+  exports.color = parse;
+})();

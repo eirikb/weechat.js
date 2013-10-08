@@ -1,6 +1,6 @@
 //  http://www.weechat.org/files/doc/devel/weechat_relay_protocol.en.html
 
-(function(exports) {
+(function() {
   function loop(range, cb) {
     var i;
     for (i = 0; i < range; i++) {
@@ -164,4 +164,4 @@
   }
 
   exports.Protocol = Protocol;
-})(typeof exports === 'undefined' ? this.protocol = {} : exports);
+})();

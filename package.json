@@ -1,7 +1,7 @@
 {
   "name": "weechat",
   "author": "Eirik Brandtzæg <eirikb@eirikb.no>",
-  "main": "src/weechat.js",
+  "main": "weechat.js",
   "version": "0.0.17",
   "description": "WeeChat Relay Protocol",
   "repository": {
@@ -9,6 +9,8 @@
     "url": "https://github.com/eirikb/weechat.js"
   },
   "devDependencies": {
-    "mocha": "~1.13.0"
+    "grunt": "~0.4.1",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-jasmine": "~0.5.2"
   }
 }
