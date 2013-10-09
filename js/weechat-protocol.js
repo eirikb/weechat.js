@@ -489,7 +489,11 @@ WeeChatProtocol.prototype = {
      * @return Character (string)
      */
     _getChar: function() {
+<<<<<<< HEAD
         return String.fromCharCode(this._getByte());
+=======
+        return this._getByte();
+>>>>>>> 2ad532d... Merge
     },
 
     /**
