@@ -208,7 +208,7 @@
     }
 
     return defaults;
-  }
+  };
 
   /**
    * Formats a command.
@@ -370,7 +370,7 @@
     }
 
     return WeeChatProtocol._formatCmd(params.id, cmdName, parts);
-  }
+  };
 
   /**
    * Formats a sync command.
@@ -568,7 +568,7 @@
         return key.split(':');
       });
 
-      for (var i = 0; i < count; i++) {
+      function runType() {
         var tmp = {};
 
         tmp.pointers = paths.map(function(path) {
@@ -578,7 +578,11 @@
           tmp[key[0]] = self._runType(key[1]);
         });
         objs.push(tmp);
-      };
+      }
+
+      for (var i = 0; i < count; i++) {
+        runType();
+      }
 
       return objs;
     },
@@ -600,7 +604,7 @@
     _getTime: function() {
       var str = this._getStrNumber();
 
-      return new Date(parseInt(str) * 1000);
+      return new Date(parseInt(str, 10) * 1000);
     },
 
     /**
@@ -633,8 +637,8 @@
      *
      * @return Character (string)
      */
-    _getChar: function() { 
-      return this._getByte(); 
+    _getChar: function() {
+      return this._getByte();
     },
 
     /**
@@ -737,7 +741,7 @@
 
       for (var i = 0; i < count; i++) {
         values.push(self._runType(type));
-      };
+      }
 
       return values;
     },

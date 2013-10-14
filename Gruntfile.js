@@ -38,6 +38,5 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jasmine');
   grunt.loadNpmTasks('grunt-contrib-uglify');
 
-  //grunt.registerTask('default', ['concat', 'jshint', 'jasmine', 'uglify']);
-  grunt.registerTask('default', ['concat', 'jasmine', 'uglify']);
+  grunt.registerTask('default', ['concat', 'jshint', 'jasmine', 'uglify']);
 };
