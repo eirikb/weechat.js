@@ -141,91 +141,15 @@
 
   exports.color = parse;
 })();
-;(function() {
-  var zlib;
-  if (this.require) {
-    zlib = require('zlib');
-  }
-
-  function Parser(cb) {
-    var self = this;
-    var buffer = new Buffer(0);
-    var total = 0;
-    var unzipping = false;
-    var protocol = new Protocol();
-
-    function parseData(data) {
-      protocol.setData(data);
-      var id = protocol.getString(),
-        obj = protocol.parse();
-
-      if (cb) cb(id, obj);
-      total = 0;
-    }
-
-    function handleData(data) {
-      protocol.setData(data);
-      // Remove total from data
-      protocol.getInt();
-      compression = protocol.getChar();
-      data = protocol.getData();
-
-      if (compression) {
-        if (!zlib) {
-          throw new Error('Zlib is currently not available');
-        }
-        unzipping = true;
-        zlib.unzip(data, function(err, data) {
-          unzipping = false;
-          if (err) throw err;
-          parseData(data);
-          self.onData();
-        });
-      } else {
-        parseData(data);
-        self.onData();
-      }
-    }
-
-    function concatBuffers(bufferA, bufferB) {
-      var buffer = new Buffer(bufferA.length + bufferB.length);
-      bufferA.copy(buffer);
-      bufferB.copy(buffer, bufferA.length);
-      return buffer;
-    }
-
-    self.onData = function(part) {
-      var data;
-
-      if (part) buffer = concatBuffers(buffer, part);
-
-      // Need at least 1 int (4 bytes) in buffer
-      if (!unzipping && buffer.length > 4) {
-        if (total === 0) {
-          protocol.setData(buffer);
-          total = protocol.getInt();
-        }
-
-        // Ready to parse buffer
-        if (buffer.length >= total) {
-          data = buffer.slice(0, total);
-          buffer = buffer.slice(total);
-          total = 0;
-          handleData(data);
-        }
-      }
-    };
-  }
-
-  exports.Parser = Parser;
-})();
 ;/**
  * WeeChat protocol handling.
  *
  * This object parses messages and formats commands for the WeeChat
  * protocol. It's independent from the communication layer and thus
  * may be used with any network mechanism.
- */ (function() {
+ */
+
+(function() {
   var WeeChatProtocol = function() {
     // specific parsing for each message type
     this._types = {
@@ -284,7 +208,7 @@
     }
 
     return defaults;
-  };
+  }
 
   /**
    * Formats a command.
@@ -446,7 +370,7 @@
     }
 
     return WeeChatProtocol._formatCmd(params.id, cmdName, parts);
-  };
+  }
 
   /**
    * Formats a sync command.
@@ -644,7 +568,7 @@
         return key.split(':');
       });
 
-      function x() {
+      for (var i = 0; i < count; i++) {
         var tmp = {};
 
         tmp.pointers = paths.map(function(path) {
@@ -654,11 +578,7 @@
           tmp[key[0]] = self._runType(key[1]);
         });
         objs.push(tmp);
-      }
-
-      for (var i = 0; i < count; i++) {
-        x();
-      }
+      };
 
       return objs;
     },
@@ -680,7 +600,7 @@
     _getTime: function() {
       var str = this._getStrNumber();
 
-      return new Date(parseInt(str, 10) * 1000);
+      return new Date(parseInt(str) * 1000);
     },
 
     /**
@@ -713,8 +633,8 @@
      *
      * @return Character (string)
      */
-    _getChar: function() {
-      return String.fromCharCode(this._getByte());
+    _getChar: function() { 
+      return this._getByte(); 
     },
 
     /**
@@ -817,7 +737,7 @@
 
       for (var i = 0; i < count; i++) {
         values.push(self._runType(type));
-      }
+      };
 
       return values;
     },
@@ -878,5 +798,7 @@
       };
     }
   };
+
+  exports.Protocol = WeeChatProtocol;
 })();
 })(typeof exports === "undefined" ? this.weechat = {} : exports)

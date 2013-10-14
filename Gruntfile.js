@@ -1,5 +1,5 @@
 module.exports = function(grunt) {
-  var src = ['src/color.js', 'src/parser.js', 'src/protocol.js'];
+  var src = ['src/color.js', 'src/protocol.js'];
 
   grunt.initConfig({
     concat: {
@@ -38,5 +38,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jasmine');
   grunt.loadNpmTasks('grunt-contrib-uglify');
 
-  grunt.registerTask('default', ['concat', 'jshint', 'jasmine', 'uglify']);
+  //grunt.registerTask('default', ['concat', 'jshint', 'jasmine', 'uglify']);
+  grunt.registerTask('default', ['concat', 'jasmine', 'uglify']);
 };
