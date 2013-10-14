@@ -117,4 +117,24 @@ describe('Protocol', function() {
       args: ['test1', 'test2']
     })).toEqual('(42) ping test1 test2\n');
   });
+
+  it('should parse hdata', function() {
+    var data = [0, 0, 0, 110, 0, 65533, 65533, 65533, 65533, 104, 100, 97, 0, 0, 0, 6, 98, 117, 102, 102, 101, 114, 0, 0, 0, 14, 115, 104, 111, 114, 116, 95, 110, 97, 109, 101, 58, 115, 116, 114, 0, 0, 0, 4, 7, 49, 102, 54, 48, 98, 49, 48, 0, 0, 0, 7, 119, 101, 101, 99, 104, 97, 116, 7, 49, 102, 97, 97, 99, 99, 48, 0, 0, 0, 5, 116, 101, 115, 116, 49, 7, 50, 56, 99, 98, 99, 102, 48, 0, 0, 0, 6, 35, 116, 101, 115, 116, 49, 7, 50, 57, 56, 56, 54, 48, 48, 65533, 65533, 65533, 65533];
+
+    var res = protocol.parse(data);
+    res = res.objects[0];
+    expect(res.type).toEqual('hda');
+    expect(res.content.length).toEqual(4);
+    expect(res.content[0].short_name).toEqual('weechat');
+    expect(res.content[1].short_name).toEqual('test1');
+    expect(res.content[2].short_name).toEqual('#test1');
+  });
+
+  it('should parse info with version', function() {
+    var data = [0, 0, 0, 34, 0, 0, 0, 0, 2, 52, 50, 105, 110, 102, 0, 0, 0, 7, 118, 101, 114, 115, 105, 111, 110, 0, 0, 0, 5, 48, 46, 52, 46, 49];
+
+    var res = protocol.parse(data);
+    expect(res.id).toEqual('42');
+    expect(res.objects[0].content.value).toEqual('0.4.1');
+  });
 });
