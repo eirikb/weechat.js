@@ -1,8 +1,10 @@
 (function(exports) {// http://weechat.org/files/doc/devel/weechat_dev.en.html#color_codes_in_strings
 
 (function() {
+  // http://weechat.org/files/doc/devel/weechat_dev.en.html#color_codes_in_strings
   var part, fg, bg, attrs;
 
+  // XTerm 8-bit pallete
   var colors = [
       '#666666', '#AA0000', '#00AA00', '#AA5500', '#0000AA',
       '#AA00AA', '#00AAAA', '#AAAAAA', '#555555', '#FF5555',
@@ -57,6 +59,13 @@
       '#C6C6C6', '#D0D0D0', '#DADADA', '#E4E4E4', '#EEEEEE'
   ];
 
+  // Push the basic color list on top of the extended color list
+  // and then when weechat requests a basic color (0-15) we rewrite 
+  // it to be a number in the extended color table
+  colors.push.apply(colors, ['', 'black', 'darkgray', 'darkred', 'red', 'darkgreen', 'lightgreen', 'brown',
+      'yellow', 'darkblue', 'lightblue', 'darkmagenta', 'magenta', 'darkcyan', 'lightcyan', 'gray', 'white'
+  ]);
+
   function setAttrs() {
     while (part.match(/^[\*\/\_\|]/)) {
       attrs.push(part.charAt(0));
@@ -71,6 +80,9 @@
       part = part.slice(6);
     } else {
       c = part.slice(0, 2);
+      // Rewrite the basic color value to the part in the extended
+      // palette where we store the basic colors
+      c = parseInt(c, 10) + 255;
       part = part.slice(2);
     }
     return c;
@@ -145,7 +157,10 @@
     });
   }
 
-  exports.color = parse;
+  exports.color = {
+    prepareCss: prepareCss,
+    parse: parse
+  };
 })();
 ;/**
  * WeeChat protocol handling.
