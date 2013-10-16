@@ -6,7 +6,7 @@ module.exports = function(grunt) {
       options: {
         separator: ';',
         banner: '(function(exports) {',
-        footer: '})(typeof exports === "undefined" ? this.weechat = {} : exports)'
+        footer: '})(typeof exports === "undefined" ? this.weeChat = {} : exports)'
       },
       dist: {
         src: src,

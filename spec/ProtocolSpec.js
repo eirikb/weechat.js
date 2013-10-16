@@ -2,7 +2,7 @@ describe('Protocol', function() {
   var protocol;
 
   beforeEach(function() {
-    protocol = new weechat.Protocol();
+    protocol = new weeChat.Protocol();
   });
 
   it('should read version', function() {
@@ -14,25 +14,25 @@ describe('Protocol', function() {
   });
 
   it('should format init', function() {
-    expect(weechat.Protocol.formatInit()).toEqual('init compression=off\n');
+    expect(weeChat.Protocol.formatInit()).toEqual('init compression=off\n');
 
-    expect(weechat.Protocol.formatInit({
+    expect(weeChat.Protocol.formatInit({
       password: 'test'
     })).toEqual('init compression=off,password=test\n');
 
-    expect(weechat.Protocol.formatInit({
+    expect(weeChat.Protocol.formatInit({
       password: 'test',
       compression: 'herpaderp'
     })).toEqual('init compression=herpaderp,password=test\n');
   });
 
   it('should format hdata', function() {
-    expect(weechat.Protocol.formatHdata({
+    expect(weeChat.Protocol.formatHdata({
       path: 'buffer:gui_buffers(*)',
       keys: ['herp,aderp,short_name']
     })).toEqual('hdata buffer:gui_buffers(*) herp,aderp,short_name\n');
 
-    expect(weechat.Protocol.formatHdata({
+    expect(weeChat.Protocol.formatHdata({
       id: 42,
       path: 'buffer:gui_buffers(*)',
       keys: ['herp,aderp,short_name']
@@ -40,34 +40,34 @@ describe('Protocol', function() {
   });
 
   it('should format info', function() {
-    expect(weechat.Protocol.formatInfo({
+    expect(weeChat.Protocol.formatInfo({
       name: 'test'
     })).toEqual('info test\n');
 
-    expect(weechat.Protocol.formatInfo({
+    expect(weeChat.Protocol.formatInfo({
       id: 42,
       name: 'test'
     })).toEqual('(42) info test\n');
   });
 
   it('should format nicklist', function() {
-    expect(weechat.Protocol.formatNicklist({
+    expect(weeChat.Protocol.formatNicklist({
       buffer: 'test'
     })).toEqual('nicklist test\n');
 
-    expect(weechat.Protocol.formatNicklist({
+    expect(weeChat.Protocol.formatNicklist({
       id: 42,
       buffer: 'test'
     })).toEqual('(42) nicklist test\n');
   });
 
   it('should format input', function() {
-    expect(weechat.Protocol.formatInput({
+    expect(weeChat.Protocol.formatInput({
       buffer: 'test',
       data: 'data'
     })).toEqual('input test data\n');
 
-    expect(weechat.Protocol.formatInput({
+    expect(weeChat.Protocol.formatInput({
       id: 42,
       buffer: 'test',
       data: 'data'
@@ -75,18 +75,18 @@ describe('Protocol', function() {
   });
 
   it('should format sync', function() {
-    expect(weechat.Protocol.formatSync()).toEqual('sync\n');
+    expect(weeChat.Protocol.formatSync()).toEqual('sync\n');
 
-    expect(weechat.Protocol.formatSync({
+    expect(weeChat.Protocol.formatSync({
       buffers: ['test1', 'test2']
     })).toEqual('sync test1,test2\n');
 
-    expect(weechat.Protocol.formatSync({
+    expect(weeChat.Protocol.formatSync({
       buffers: ['test1', 'test2'],
       options: ['option1', 'option2']
     })).toEqual('sync test1,test2 option1,option2\n');
 
-    expect(weechat.Protocol.formatSync({
+    expect(weeChat.Protocol.formatSync({
       id: 42,
       buffers: ['test1', 'test2'],
       options: ['option1', 'option2']
@@ -94,25 +94,25 @@ describe('Protocol', function() {
   });
 
   it('should format test', function() {
-    expect(weechat.Protocol.formatTest()).toEqual('test\n');
+    expect(weeChat.Protocol.formatTest()).toEqual('test\n');
 
-    expect(weechat.Protocol.formatTest({
+    expect(weeChat.Protocol.formatTest({
       id: 42
     })).toEqual('(42) test\n');
   });
 
   it('should format quit', function() {
-    expect(weechat.Protocol.formatQuit()).toEqual('quit\n');
+    expect(weeChat.Protocol.formatQuit()).toEqual('quit\n');
   });
 
   it('should format ping', function() {
-    expect(weechat.Protocol.formatPing()).toEqual('ping\n');
+    expect(weeChat.Protocol.formatPing()).toEqual('ping\n');
 
-    expect(weechat.Protocol.formatPing({
+    expect(weeChat.Protocol.formatPing({
       id: 42
     })).toEqual('(42) ping\n');
 
-    expect(weechat.Protocol.formatPing({
+    expect(weeChat.Protocol.formatPing({
       id: 42,
       args: ['test1', 'test2']
     })).toEqual('(42) ping test1 test2\n');
@@ -136,5 +136,22 @@ describe('Protocol', function() {
     var res = protocol.parse(data);
     expect(res.id).toEqual('42');
     expect(res.objects[0].content.value).toEqual('0.4.1');
+  });
+
+  it('should handle parts of data', function() {
+    var data = [
+      [0, 0, 0, 34, ],
+      [0, 0, 0, 0, 2, 52, 50, 105, 110],
+      [102, 0, 0, 0, 7, 118, 101, 114, 115, 105, 111, 110, 0],
+      [0, 0, 5, 48, 46, 52, 46, 49]
+    ];
+
+    data.slice(0, -1).forEach(function(data) {
+      protocol._setData(data);
+    });
+
+    // TODO: Fix
+    //var res = protocol.parse(data.slice(-1)[0]);
+    //expect(res.objects[0].content.value).toEqual('0.4.1');
   });
 });

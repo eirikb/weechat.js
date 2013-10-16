@@ -3,12 +3,11 @@
 (function() {
   var part, fg, bg, attrs;
 
-  // XTerm 8-bit pallete
   var colors = [
-      '#000000', '#AA0000', '#00AA00', '#AA5500', '#0000AA',
+      '#666666', '#AA0000', '#00AA00', '#AA5500', '#0000AA',
       '#AA00AA', '#00AAAA', '#AAAAAA', '#555555', '#FF5555',
       '#55FF55', '#FFFF55', '#5555FF', '#FF55FF', '#55FFFF',
-      '#FFFFFF', '#000000', '#00005F', '#000087', '#0000AF',
+      '#FFFFFF', '#666666', '#00005F', '#000087', '#0000AF',
       '#0000D7', '#0000FF', '#005F00', '#005F5F', '#005F87',
       '#005FAF', '#005FD7', '#005FFF', '#008700', '#00875F',
       '#008787', '#0087AF', '#0087D7', '#00AF00', '#00AF5F',
@@ -75,6 +74,13 @@
       part = part.slice(2);
     }
     return c;
+  }
+
+  function prepareCss(color) {
+    /*
+     * Translates a weechat color to CSS
+     */
+    return 'color: ' + color;
   }
 
   var prefixes = {
@@ -805,4 +811,4 @@
 
   exports.Protocol = WeeChatProtocol;
 })();
-})(typeof exports === "undefined" ? this.weechat = {} : exports)
+})(typeof exports === "undefined" ? this.weeChat = {} : exports)
